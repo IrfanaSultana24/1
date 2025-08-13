@@ -1,240 +1,183 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Thank you</title>
-<style>
-  :root{
-    --bg1:#0f172a; --bg2:#0b1220;        /* page background (behind your photo) */
-    --card:#0b1220cc;                    /* message card with ~80% opacity */
-    --text:#e6eef7; --muted:#9fb0c3;     /* copy colors */
-    --border:#1f2a44; --accent:#30c48d;  /* subtle accent */
-  }
-  * { box-sizing:border-box }
-  html,body{ height:100%; margin:0 }
-  body{
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial;
-    color:var(--text);
-    display:grid; place-items:center;
-    background: radial-gradient(1200px 800px at 10% 10%, var(--bg1), var(--bg2));
-    background-size:cover; background-position:center; background-attachment:fixed;
-    overflow:hidden;
-  }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🎉 A Little Goodbye</title>
+  <style>
+    :root{
+      --bg1:#0f172a; --bg2:#1e293b;
+      --card:#0b1220cc; /* make more/less transparent by changing last two hex digits */
+      --text:#e2e8f0; --border:#1f2a44;
+    }
+    html,body{height:100%;margin:0}
+    body{
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial;
+      color:var(--text);
+      display:grid; place-items:center;
+      background: radial-gradient(1200px 800px at 10% 10%, var(--bg2), var(--bg1));
+      background-size: cover; background-position: center; background-attachment: fixed;
+      overflow-x:hidden;
+    }
+    .card{
+      position:relative; z-index:1; max-width:720px; width:min(92vw,720px);
+      backdrop-filter: blur(12px);
+      background: var(--card);
+      border:1px solid var(--border); border-radius:20px;
+      padding:28px 28px 22px;
+      box-shadow:0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    h1{ font-size: clamp(28px,5vw,44px); margin:8px 0 10px; line-height:1.1; }
+    .msg{ font-size: clamp(16px,2.6vw,20px); opacity:.92; margin:0 0 14px; }
+    .meta{ opacity:.8; font-size:14px; margin-top:6px; }
+    .row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+    button{
+      appearance:none; border:1px solid #334155; background:#0b1220; color:var(--text);
+      padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600;
+      transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    button:hover{ border-color:#475569; box-shadow:0 8px 20px rgba(0,0,0,.25); transform:translateY(-1px); }
 
-  /* Center card */
-  .card{
-    position:relative; z-index:3;
-    width:min(92vw, 720px);
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:20px;
-    padding:32px 28px 24px;
-    box-shadow:0 24px 60px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.06);
-    backdrop-filter: blur(10px);
-  }
-  h1{ margin:0 0 10px; font-size:clamp(26px,4.8vw,42px); line-height:1.1; letter-spacing:.2px }
-  .msg{ margin:0 0 14px; font-size:clamp(15px,2.4vw,18px); color:var(--text); opacity:.95 }
-  .meta{ margin-top:6px; color:var(--muted); font-size:14px }
+    /* Modal */
+    .modal{ position:fixed; inset:0; display:none; z-index:20; align-items:center; justify-content:center; background:rgba(0,0,0,.45); padding:18px; }
+    .modal.open{ display:flex; }
+    .modal-card{ width:min(92vw,620px); background:#0b1220; border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:0 24px 60px rgba(0,0,0,.5); }
+    .modal-card h2{ margin:0 0 10px; font-size:20px; }
+    textarea{ width:100%; min-height:140px; resize:vertical; background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:12px; padding:10px; font-family:inherit; font-size:14px; }
+    .modal-actions{ margin-top:12px; display:flex; gap:10px; justify-content:flex-end; }
 
-  .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:18px }
-  button, a.btn{
-    appearance:none; border:1px solid #2b3b52; background:#0b1220; color:var(--text);
-    padding:10px 14px; border-radius:12px; font-weight:600; cursor:pointer; text-decoration:none;
-    transition: border-color .15s ease, box-shadow .25s ease, transform .06s ease;
-  }
-  button:hover, a.btn:hover{ border-color:#3a4c66; box-shadow:0 8px 22px rgba(0,0,0,.28); transform:translateY(-1px) }
-  .primary{ background:linear-gradient(180deg, #0f172a 0, #0c1425 100%); border-color:#2b3b52 }
-  .accent{ border-color:#2e5a4c; background:linear-gradient(180deg, #0f1f1a 0, #0c1714 100%) }
-  .accent:hover{ border-color:#2f8568 }
-
-  /* Minimal “drift” layer (evenly spread, very sparse) */
-  .g{ position:fixed; inset:0; z-index:1; pointer-events:none; }
-  .p{
-    position:absolute; top:-60px; color:#fff; opacity:.35;
-    text-shadow:0 2px 8px rgba(0,0,0,.35);
-    animation: fall var(--dur,s) linear var(--delay,s) forwards,
-               sway 9s ease-in-out infinite;
-    will-change: transform;
-  }
-  @keyframes fall { to { transform:translateY(110vh) } }
-  @keyframes sway { 0%{ transform:translateX(0) rotate(0) }
-                    50%{ transform:translateX(var(--sx,26px)) rotate(var(--rot,8deg)) }
-                    100%{ transform:translateX(0) rotate(0) } }
-
-  /* Top-right controls (tiny) */
-  .ctrl{
-    position:fixed; right:14px; top:14px; z-index:4; display:flex; gap:8px; align-items:center;
-    background:#0b1220cc; border:1px solid var(--border); border-radius:12px; padding:6px 10px;
-    font-size:12px; backdrop-filter:blur(8px)
-  }
-  .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); margin-right:6px }
-  .badge{ display:inline-flex; align-items:center; gap:8px; font-weight:600; }
-
-  /* Respect “reduce motion” */
-  @media (prefers-reduced-motion: reduce){
-    .p{ animation:none }
-  }
-</style>
+    /* Emoji rain */
+    .emoji { position:fixed; top:-60px; pointer-events:none; z-index:0; /* behind the card */ }
+    .emoji .inner{
+      display:block; filter: drop-shadow(0 3px 6px rgba(0,0,0,.35));
+      animation: sway 3s ease-in-out infinite;
+    }
+    @keyframes fall { to { transform: translateY(110vh); opacity:1; } }
+    @keyframes sway { 0%{ transform: translateX(0) rotate(0deg); }
+                      50%{ transform: translateX(var(--sx, 22px)) rotate(var(--rot, 10deg)); }
+                      100%{ transform: translateX(0) rotate(0deg); } }
+  </style>
 </head>
 <body>
-  <!-- Tiny controls -->
-  <div class="ctrl">
-    <span class="badge"><span class="dot"></span>Interactive</span>
-    <label style="display:flex; gap:6px; align-items:center">
-      <input id="toggleAnim" type="checkbox" checked />
-      <span>Animation</span>
-    </label>
-  </div>
-
-  <!-- Gentle background drift -->
-  <div class="g" id="drift"></div>
-
-  <!-- Message -->
   <div class="card">
     <h1 id="title">Thank you, team!</h1>
-    <p class="msg" id="message">
-      It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead.
-    </p>
+    <p class="msg" id="message">It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!</p>
     <p class="meta" id="signature">— Irfana</p>
-
     <div class="row">
-      <button id="applause" class="primary">👏 Applause <span id="count" style="opacity:.8;margin-left:6px">0</span></button>
-      <button id="feedbackBtn" class="accent">💬 Leave feedback</button>
-      <a id="connect" class="btn" href="#" target="_blank" rel="noopener">🔗 Connect</a>
+      <button id="replay">🤝 Replay animation</button>
+      <button id="feedbackBtn">💬 Leave feedback</button>
     </div>
   </div>
 
-  <!-- Feedback modal (simple) -->
-  <div id="modal"
-       style="position:fixed;inset:0;display:none;z-index:10;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:18px">
-    <div style="width:min(92vw,620px);background:#0b1220;border:1px solid #1f2a44;border-radius:16px;padding:18px;
-                box-shadow:0 24px 60px rgba(0,0,0,.5)">
-      <h3 style="margin:0 0 10px">Share your feedback</h3>
-      <textarea id="fbText" placeholder="Write a quick note..."
-        style="width:100%;min-height:140px;background:#0f172a;color:var(--text);
-               border:1px solid #334155;border-radius:12px;padding:10px;font:inherit"></textarea>
-      <div class="row" style="justify-content:flex-end;margin-top:12px">
+  <!-- Feedback Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-card">
+      <h2>💬 Share your feedback</h2>
+      <textarea id="fbText" placeholder="Write a quick note..."></textarea>
+      <div class="modal-actions">
         <button id="cancel">Cancel</button>
-        <button id="send" class="primary">Send</button>
+        <button id="send">Send</button>
       </div>
     </div>
   </div>
 
-  <!-- Hidden target for Google Form -->
+  <!-- Hidden iframe target for Google Form submission -->
   <iframe name="gform-target" style="display:none"></iframe>
 
-<script>
-  /* ---------- Text & links from URL ---------- */
-  const qs = new URLSearchParams(location.search);
-  const title = qs.get('title') || "Thank you, team!";
-  const msg   = qs.get('msg')   || "It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead.";
-  const name  = qs.get('name')  || "Irfana";
-  const bg    = qs.get('bg')    || "1.jpeg";  // put your image in the repo and pass ?bg=1.jpeg
-  const link  = qs.get('link')  || "https://www.linkedin.com/"; // connect button
+  <script>
+    const qs = new URLSearchParams(location.search);
 
-  document.getElementById('title').textContent = title;
-  document.getElementById('message').textContent = msg;
-  document.getElementById('signature').textContent = `— ${name}`;
-  document.getElementById('connect').href = link;
+    // Content
+    const title = qs.get('title') || "Thank you, team!";
+    const msg   = qs.get('msg')   || "It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!";
+    const name  = qs.get('name')  || "Irfana";
+    const bg    = qs.get('bg')    || "1.jpeg";
 
-  if (bg){
-    const url = bg.match(/^https?:\/\//) ? bg : `${bg}`;
-    document.body.style.backgroundImage = `url('${url}'), radial-gradient(1200px 800px at 10% 10%, var(--bg1), var(--bg2))`;
-    document.body.style.backgroundSize   = 'cover, auto';
-    document.body.style.backgroundBlendMode = 'multiply';
-  }
+    document.getElementById('title').textContent = title;
+    document.getElementById('message').textContent = msg;
+    document.getElementById('signature').textContent = `— ${name}`;
 
-  /* ---------- Minimal “drift” (even lanes, very sparse) ---------- */
-  const DRIFT = document.getElementById('drift');
-  const ICONS = ["👋","🤝","👏"];          // restrained set
-  const MAX   = 8;                        // max on screen
-  const INTERVAL = 1600;                  // spawn gap (ms)
-  const DUR_RANGE = [18, 26];             // slow fall
+    if (bg) {
+      const url = bg.match(/^https?:\/\//) ? bg : `${bg}`;
+      document.body.style.backgroundImage = `url('${url}')`;
+      document.body.style.backgroundSize = 'cover';
+      document.body.style.backgroundPosition = 'center';
+    }
 
-  let lane = 0, timer = null, animOn = true;
+    /* ========== Emoji rain (👋 🤝) ========== */
+    const EMOJIS = ["👋","🤝","💐"]; // edit to taste
 
-  function lanes(){
-    const n = Math.max(8, Math.floor(window.innerWidth / 140)); // wider lanes for less clutter
-    const pad = 2;                                              // vw
-    const step = (100 - pad*2) / (n - 1);
-    return { n, pad, step };
-  }
+    function emojiRain(count=36){
+      for(let i=0;i<count;i++){
+        const wrap = document.createElement('div');
+        wrap.className = 'emoji';
+        const span = document.createElement('span');
+        span.className = 'inner';
+        span.textContent = EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
 
-  function spawn(){
-    if (!animOn) return;
-    if (DRIFT.childElementCount >= MAX) return;
+        // random sizes/positions
+        const left = Math.random()*100; // vw
+        const dur  = 6 + Math.random()*4; // 6–10s
+        const delay= Math.random()*1.2;   // 0–1.2s
+        const size = 26 + Math.random()*22; // px
+        const sway = (Math.random()<.5?-1:1) * (12 + Math.random()*24); // px
+        const rot  = (Math.random()<.5?-1:1) * (5 + Math.random()*20) + "deg";
 
-    const { n, pad, step } = lanes();
-    const xvw = pad + (lane * step);
-    lane = (lane + 1) % n;
+        wrap.style.left = left + "vw";
+        wrap.style.animation = `fall ${dur}s linear ${delay}s forwards`;
+        span.style.fontSize = size + "px";
+        span.style.setProperty('--sx', sway + "px");
+        span.style.setProperty('--rot', rot);
 
-    const el = document.createElement('div');
-    el.className = 'p';
-    el.textContent = ICONS[Math.floor(Math.random()*ICONS.length)];
-    const dur = (Math.random()*(DUR_RANGE[1]-DUR_RANGE[0])+DUR_RANGE[0]).toFixed(1);
-    const delay = (Math.random()*0.8).toFixed(2);
-    el.style.left = `calc(${xvw}vw + ${(-step*0.35 + Math.random()*step*0.7).toFixed(2)}vw)`; // small jitter in lane
-    el.style.setProperty('--dur', dur+'s');
-    el.style.setProperty('--delay', delay+'s');
-    el.style.setProperty('--sx', (Math.random()<.5?-1:1)*Math.floor(16+Math.random()*18)+'px');
-    el.style.setProperty('--rot', (Math.random()<.5?-1:1)*(6+Math.random()*6)+'deg');
-    el.style.fontSize = (22 + Math.random()*8) + 'px';
+        wrap.appendChild(span);
+        document.body.appendChild(wrap);
 
-    DRIFT.appendChild(el);
-    setTimeout(()=> el.remove(), (parseFloat(dur)+parseFloat(delay)+0.5)*1000);
-  }
+        // cleanup
+        setTimeout(()=>wrap.remove(), (dur+delay+0.5)*1000);
+      }
+    }
 
-  function start(){ if(!timer){ timer = setInterval(spawn, INTERVAL); } }
-  function stop(){ if(timer){ clearInterval(timer); timer=null; } }
-  start();
+    // play on load and on click
+    window.addEventListener('load', () => emojiRain());
+    document.getElementById('replay').addEventListener('click', () => emojiRain());
 
-  // Animation toggle & reduced motion
-  const toggle = document.getElementById('toggleAnim');
-  toggle.addEventListener('change', ()=>{ animOn = toggle.checked; animOn ? start() : stop(); });
-  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-    toggle.checked = false; animOn = false; stop();
-  }
+    /* ========== Google Form direct submit (no email) ========== */
+    // From your pre-fill link:
+    // https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/viewform?usp=pp_url&entry.1175385091=...
+    const GF_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/formResponse";
+    const GF_FEEDBACK_FIELD = "entry.1175385091";
 
-  /* ---------- Applause (subtle) ---------- */
-  let count = 0;
-  const btn = document.getElementById('applause');
-  const num = document.getElementById('count');
-  btn.addEventListener('click', ()=>{
-    count++; num.textContent = count;
-    btn.style.transform = 'translateY(-1px) scale(1.02)';
-    setTimeout(()=> btn.style.transform = '', 120);
-  });
+    const modal = document.getElementById('modal');
+    const feedbackBtn = document.getElementById('feedbackBtn');
+    const cancelBtn = document.getElementById('cancel');
+    const sendBtn = document.getElementById('send');
+    const fbText = document.getElementById('fbText');
 
-  /* ---------- Feedback → Google Form (direct submit) ---------- */
-  const GF_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/formResponse";
-  const GF_FIELD  = "entry.1175385091";
+    feedbackBtn.addEventListener('click', () => { modal.classList.add('open'); fbText.focus(); });
+    cancelBtn.addEventListener('click', () => modal.classList.remove('open'));
 
-  const modal = document.getElementById('modal');
-  document.getElementById('feedbackBtn').addEventListener('click', ()=> modal.style.display = 'flex');
-  document.getElementById('cancel').addEventListener('click', ()=> modal.style.display = 'none');
-  document.getElementById('send').addEventListener('click', ()=>{
-    const v = document.getElementById('fbText').value.trim();
-    if(!v){ alert("Please write a quick note first."); return; }
+    sendBtn.addEventListener('click', () => {
+      const message = fbText.value.trim();
+      if (!message){ alert("Please write a quick note first."); return; }
 
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = GF_ACTION;
-    form.target = 'gform-target';
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = GF_ACTION;
+      form.target = 'gform-target';
 
-    const t = document.createElement('textarea');
-    t.name = GF_FIELD;
-    t.value = `${v}\n\n— sent from: ${location.href}`;
-    form.appendChild(t);
+      const msgInput = document.createElement('textarea');
+      msgInput.name = GF_FEEDBACK_FIELD;
+      msgInput.value = `${message}\n\n— sent from: ${location.href}`;
+      form.appendChild(msgInput);
 
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
 
-    alert("Thanks! Your feedback was sent ✅");
-    modal.style.display = 'none';
-    document.getElementById('fbText').value = "";
-  });
-</script>
+      alert("Thanks! Your feedback was sent ✅");
+      modal.classList.remove('open');
+      fbText.value = "";
+    });
+  </script>
 </body>
 </html>
