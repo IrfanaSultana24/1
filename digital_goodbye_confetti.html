@@ -8,7 +8,7 @@
     :root{
       --bg1:#0f172a; /* fallback if no image */
       --bg2:#1e293b;
-      --card:#0b1220dd;
+      --card:#0b1220dd;   /* make lighter like #0b1220b3 for more transparency */
       --text:#e2e8f0;
       --accent:#38bdf8;
       --accent2:#a78bfa;
@@ -33,7 +33,6 @@
       box-shadow: 0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
       overflow:hidden;
     }
-    /* .badge removed */
     h1{ font-size: clamp(28px, 5vw, 44px); margin:8px 0 10px; line-height:1.1; }
     .msg{ font-size: clamp(16px, 2.6vw, 20px); opacity:.92; margin:0 0 14px; }
     .meta{ opacity:.8; font-size:14px; margin-top:6px; }
@@ -72,7 +71,6 @@
   <canvas id="confetti"></canvas>
 
   <div class="card">
-    <!-- removed: <div class="badge">🎉 Celebration Mode</div> -->
     <h1 id="title">Thank you, team!</h1>
     <p class="msg" id="message">
       It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!
@@ -107,10 +105,8 @@
     const title = qs.get('title') || "Thank you, team!";
     const msg   = qs.get('msg')   || "It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!";
     const name  = qs.get('name')  || "Irfana";
-    const email = qs.get('email') || "irfanasultana24@gmail.com";          // for the "Stay in touch" button
-    const bg    = qs.get('bg')    || "1.jpeg";    // default background image
-    const fbTo  = qs.get('fb_to') || email; // feedback recipient
-    const fbSub = qs.get('fb_sub')|| "Feedback for Irfana";
+    const email = qs.get('email') || "irfanasultana24@gmail.com";  // for the "Stay in touch" button
+    const bg    = qs.get('bg')    || "1.jpeg";                     // default background image
 
     document.getElementById('title').textContent = title;
     document.getElementById('message').textContent = msg;
@@ -145,7 +141,11 @@
     window.addEventListener('load', burst);
     document.getElementById('replay').addEventListener('click', burst);
 
-    // Feedback popup → opens prefilled email on Send
+    // === Google Form configuration (from your pre-fill link) ===
+    const GOOGLE_FORM_BASE = "https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/viewform?usp=pp_url";
+    const GF_FEEDBACK_FIELD = "entry.1175385091"; // "Your Feedback"
+
+    // Feedback popup → opens Google Form prefilled; user just clicks Submit
     const modal = document.getElementById('modal');
     const feedbackBtn = document.getElementById('feedbackBtn');
     const cancelBtn = document.getElementById('cancel');
@@ -154,17 +154,19 @@
 
     feedbackBtn.addEventListener('click', () => { modal.classList.add('open'); fbText.focus(); });
     cancelBtn.addEventListener('click', () => modal.classList.remove('open'));
+
     sendBtn.addEventListener('click', () => {
-      const body = encodeURIComponent(fbText.value + "\n\n— sent from the goodbye page:\n" + location.href);
-      const subject = encodeURIComponent(fbSub);
-      const to = fbTo || email || "";
-      if(!to){ alert("No feedback recipient configured."); return; }
-      const link = `mailto:${to}?subject=${subject}&body=${body}`;
-      window.location.href = link;
+      const message = fbText.value.trim();
+      if (!message){ alert("Please write a quick note first."); return; }
+
+      const url = new URL(GOOGLE_FORM_BASE);
+      // include page link for context
+      url.searchParams.set(GF_FEEDBACK_FIELD, `${message}\n\n— sent from: ${location.href}`);
+
+      window.open(url.toString(), "_blank"); // open prefilled form
       modal.classList.remove('open');
       fbText.value = "";
     });
   </script>
 </body>
 </html>
-
