@@ -46,16 +46,22 @@
     textarea{ width:100%; min-height:140px; resize:vertical; background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:12px; padding:10px; font-family:inherit; font-size:14px; }
     .modal-actions{ margin-top:12px; display:flex; gap:10px; justify-content:flex-end; }
 
-    /* Emoji rain */
-    .emoji { position:fixed; top:-60px; pointer-events:none; z-index:0; /* behind the card */ }
+    /* Emoji rain (behind the card) */
+    .emoji { position:fixed; top:-60px; pointer-events:none; z-index:0; }
     .emoji .inner{
       display:block; filter: drop-shadow(0 3px 6px rgba(0,0,0,.35));
-      animation: sway 3s ease-in-out infinite;
+      /* slower, calmer sway */
+      animation: sway 8s ease-in-out infinite;
     }
     @keyframes fall { to { transform: translateY(110vh); opacity:1; } }
     @keyframes sway { 0%{ transform: translateX(0) rotate(0deg); }
                       50%{ transform: translateX(var(--sx, 22px)) rotate(var(--rot, 10deg)); }
                       100%{ transform: translateX(0) rotate(0deg); } }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .emoji .inner{ animation:none }
+    }
   </style>
 </head>
 <body>
@@ -104,42 +110,78 @@
       document.body.style.backgroundPosition = 'center';
     }
 
-    /* ========== Emoji rain (👋 🤝) ========== */
-    const EMOJIS = ["👋","🤝","💐"]; // edit to taste
+    /* ========== CONTINUOUS, SLOW, EVENLY-SPREAD RAIN ========== */
+    const EMOJIS = ["👋","🤝","💐"];      // keep small + professional
+    const MAX_ACTIVE = 16;                // max visible at once
+    const SPAWN_MS   = 1200;              // how often to spawn (bigger = fewer)
+    const DUR_RANGE  = [18, 28];          // fall duration in seconds (slow)
 
-    function emojiRain(count=36){
-      for(let i=0;i<count;i++){
-        const wrap = document.createElement('div');
-        wrap.className = 'emoji';
-        const span = document.createElement('span');
-        span.className = 'inner';
-        span.textContent = EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
+    let laneIndex = 0;
+    let timer = null;
 
-        // random sizes/positions
-        const left = Math.random()*100; // vw
-        const dur  = 6 + Math.random()*4; // 6–10s
-        const delay= Math.random()*1.2;   // 0–1.2s
-        const size = 26 + Math.random()*22; // px
-        const sway = (Math.random()<.5?-1:1) * (12 + Math.random()*24); // px
-        const rot  = (Math.random()<.5?-1:1) * (5 + Math.random()*20) + "deg";
-
-        wrap.style.left = left + "vw";
-        wrap.style.animation = `fall ${dur}s linear ${delay}s forwards`;
-        span.style.fontSize = size + "px";
-        span.style.setProperty('--sx', sway + "px");
-        span.style.setProperty('--rot', rot);
-
-        wrap.appendChild(span);
-        document.body.appendChild(wrap);
-
-        // cleanup
-        setTimeout(()=>wrap.remove(), (dur+delay+0.5)*1000);
-      }
+    function lanes(){
+      // number of columns based on width; pad to keep edges clean
+      const n = Math.max(10, Math.floor(window.innerWidth / 120));
+      const pad = 1.5; // vw
+      const step = (100 - pad*2) / (n - 1);
+      return { n, pad, step };
     }
 
-    // play on load and on click
-    window.addEventListener('load', () => emojiRain());
-    document.getElementById('replay').addEventListener('click', () => emojiRain());
+    function activeCount(){ return document.querySelectorAll('.emoji').length; }
+
+    function spawnOne(xvw = null){
+      if (activeCount() >= MAX_ACTIVE) return;
+
+      const { n, pad, step } = lanes();
+      // round-robin lanes for even coverage + small jitter
+      if (xvw === null){
+        xvw = pad + (laneIndex * step) + (Math.random()*step*0.4 - step*0.2);
+        laneIndex = (laneIndex + 1) % n;
+      }
+
+      const wrap = document.createElement('div');
+      wrap.className = 'emoji';
+      const span = document.createElement('span');
+      span.className = 'inner';
+      span.textContent = EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
+
+      const dur   = DUR_RANGE[0] + Math.random() * (DUR_RANGE[1] - DUR_RANGE[0]);
+      const delay = Math.random() * 0.8;
+      const size  = 24 + Math.random() * 20;
+      const sway  = (Math.random()<.5?-1:1) * (12 + Math.random()*22);
+      const rot   = (Math.random()<.5?-1:1) * (5 + Math.random()*12) + "deg";
+
+      wrap.style.left = xvw + "vw";
+      wrap.style.animation = `fall ${dur}s linear ${delay}s forwards`;
+      span.style.fontSize = size + "px";
+      span.style.setProperty('--sx', sway + "px");
+      span.style.setProperty('--rot', rot);
+
+      wrap.appendChild(span);
+      document.body.appendChild(wrap);
+      setTimeout(()=>wrap.remove(), (dur+delay+0.6)*1000);
+    }
+
+    function startRain(){
+      if (timer) return;
+      timer = setInterval(()=> spawnOne(), SPAWN_MS);
+    }
+    function stopRain(){
+      if (timer){ clearInterval(timer); timer = null; }
+    }
+
+    // Start continuous rain on load
+    window.addEventListener('load', startRain);
+
+    // Replay = tasteful mini-burst on top of the stream
+    document.getElementById('replay').addEventListener('click', () => {
+      for (let i=0;i<10;i++) setTimeout(()=> spawnOne(), i*120);
+    });
+
+    // Respect reduced-motion preference
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      stopRain();
+    }
 
     /* ========== Google Form direct submit (no email) ========== */
     // From your pre-fill link:
