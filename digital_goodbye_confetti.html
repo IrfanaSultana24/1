@@ -1,75 +1,90 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>🎉 A Little Goodbye</title>
   <style>
     :root{
-      --bg1:#0f172a;
+      --bg1:#0f172a; /* fallback if no image */
       --bg2:#1e293b;
-      --card:#0b1220aa;
+      --card:#0b1220dd;
       --text:#e2e8f0;
       --accent:#38bdf8;
       --accent2:#a78bfa;
+      --border:#1f2a44;
     }
     html,body{height:100%;margin:0}
     body{
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial;
       color:var(--text);
-      background: radial-gradient(1200px 800px at 10% 10%, var(--bg2), var(--bg1));
-      display:grid;
-      place-items:center;
+      display:grid; place-items:center;
+      background: radial-gradient(1200px 800px at 10% 10%, var(--bg2), var(--bg1)); /* replaced by image if provided */
+      background-size: cover; background-position: center; background-attachment: fixed;
+    }
+    /* subtle dark overlay so text stays readable on photos */
+    body::before{
+      content:""; position:fixed; inset:0; pointer-events:none;
+      background: radial-gradient(1200px 800px at 10% 10%, rgba(2,6,23,.65), rgba(2,6,23,.8));
+      z-index:0;
     }
     .card{
-      max-width: 720px;
-      width: min(92vw, 720px);
+      position:relative; z-index:1;
+      max-width: 720px; width: min(92vw, 720px);
       backdrop-filter: blur(12px);
-      background: linear-gradient(180deg, #0b1220dd, #0b122099);
-      border: 1px solid #1f2a44;
+      background: var(--card);
+      border: 1px solid var(--border);
       border-radius: 20px;
-      padding: 28px 28px 24px;
+      padding: 28px 28px 22px;
       box-shadow: 0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
-      position: relative;
-      overflow: hidden;
+      overflow:hidden;
     }
     .badge{
       position:absolute; inset: 0 auto auto 0;
       transform: translate(-18px,-18px) rotate(-15deg);
       background: linear-gradient(90deg, var(--accent), var(--accent2));
       color:#0b1220; font-weight:700; letter-spacing:.04em;
-      padding:6px 18px; border-radius: 999px; font-size: 12px;
+      padding:6px 18px; border-radius:999px; font-size:12px;
       box-shadow: 0 8px 20px rgba(56,189,248,.4);
     }
-    h1{
-      font-size: clamp(28px, 5vw, 44px);
-      margin: 8px 0 10px;
-      line-height:1.1;
-    }
-    .msg{
-      font-size: clamp(16px, 2.6vw, 20px);
-      opacity:.92; margin: 0 0 14px 0;
-    }
-    .meta{
-      opacity:.75; font-size:14px; margin-top:6px;
-    }
-    .row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px;}
+    h1{ font-size: clamp(28px, 5vw, 44px); margin:8px 0 10px; line-height:1.1; }
+    .msg{ font-size: clamp(16px, 2.6vw, 20px); opacity:.92; margin:0 0 14px; }
+    .meta{ opacity:.8; font-size:14px; margin-top:6px; }
+    .row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
     button, a.btn{
-      appearance:none; border:1px solid #334155; background:#111827; color:var(--text);
+      appearance:none; border:1px solid #334155; background:#0b1220; color:var(--text);
       padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600; text-decoration:none;
       transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease;
     }
-    button:hover, a.btn:hover{
-      border-color:#475569; box-shadow: 0 8px 20px rgba(0,0,0,.25);
-      transform: translateY(-1px);
+    button:hover, a.btn:hover{ border-color:#475569; box-shadow:0 8px 20px rgba(0,0,0,.25); transform:translateY(-1px); }
+    .ghost{ background:transparent }
+    footer{ margin-top: 8px; font-size:12px; opacity:.6; }
+
+    /* Feedback modal */
+    .modal{
+      position: fixed; inset:0; display:none; z-index:20;
+      align-items:center; justify-content:center;
+      background: rgba(0,0,0,.45);
+      padding: 18px;
     }
-    .ghost{ background: transparent }
-    footer{ margin-top: 10px; font-size:12px; opacity:.6; }
+    .modal.open{ display:flex; }
+    .modal-card{
+      width:min(92vw, 620px); background:#0b1220; border:1px solid var(--border);
+      border-radius:16px; padding:18px; box-shadow:0 24px 60px rgba(0,0,0,.5);
+    }
+    .modal-card h2{ margin:0 0 10px; font-size:20px; }
+    textarea{
+      width:100%; min-height:140px; resize:vertical;
+      background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:12px; padding:10px;
+      font-family: inherit; font-size:14px;
+    }
+    .modal-actions{ margin-top:12px; display:flex; gap:10px; justify-content:flex-end; }
     canvas#confetti{ position:fixed; inset:0; pointer-events:none; z-index:10;}
   </style>
 </head>
 <body>
   <canvas id="confetti"></canvas>
+
   <div class="card">
     <div class="badge">🎉 Celebration Mode</div>
     <h1 id="title">Thank you, team!</h1>
@@ -77,24 +92,55 @@
       It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!
     </p>
     <p class="meta" id="signature">— Irfana</p>
+
     <div class="row">
       <button id="replay">🎊 Replay confetti</button>
-      <a id="mailto" class="btn ghost" href="#">💌 Stay in touch</a>
-      <button id="share" class="ghost">🔗 Copy link with my message</button>
+      <a id="mailto" class="btn ghost" href="#" aria-label="Stay in touch via email">💌 Stay in touch</a>
+      <button id="feedbackBtn">💬 Leave feedback</button>
+    </div>
+    <footer id="hint"></footer>
+  </div>
+
+  <!-- Feedback Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-card">
+      <h2>💬 Share your feedback</h2>
+      <textarea id="fbText" placeholder="Write a quick note..."></textarea>
+      <div class="modal-actions">
+        <button id="cancel">Cancel</button>
+        <button id="send">Send</button>
+      </div>
     </div>
   </div>
 
+  <!-- Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   <script>
-    const params = new URLSearchParams(location.search);
-    const title = params.get('title') || "Thank you, team!";
-    const msg   = params.get('msg')   || "It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!";
-    const name  = params.get('name')  || "Irfana";
-    const email = params.get('email') || "";
+    const qs = new URLSearchParams(location.search);
+
+    // Content
+    const title = qs.get('title') || "Thank you, team!";
+    const msg   = qs.get('msg')   || "It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!";
+    const name  = qs.get('name')  || "Irfana";
+    const email = qs.get('email') || "";              // for the "Stay in touch" button
+    const bg    = qs.get('bg')    || "";              // background image path or URL
+    const fbTo  = qs.get('fb_to') || email || "";     // who receives feedback (falls back to email)
+    const fbSub = qs.get('fb_sub')|| "Feedback for Irfana";
 
     document.getElementById('title').textContent = title;
     document.getElementById('message').textContent = msg;
     document.getElementById('signature').textContent = `— ${name}`;
+
+    // Background image if provided (?bg=yourimage.jpg or full URL)
+    if(bg){
+      const url = bg.match(/^https?:\/\//) ? bg : `${bg}`;
+      document.body.style.backgroundImage =
+        `linear-gradient(0deg, rgba(2,6,23,.65), rgba(2,6,23,.65)), url('${url}')`;
+      document.body.style.backgroundSize = 'cover';
+      document.body.style.backgroundPosition = 'center';
+    }
+
+    // Mailto button
     const mailto = document.getElementById('mailto');
     if(email){
       mailto.href = `mailto:${email}`;
@@ -102,9 +148,9 @@
       mailto.style.display = 'none';
     }
 
+    // Confetti
     function burst(){
-      const duration = 2000;
-      const end = Date.now() + duration;
+      const duration = 2000, end = Date.now() + duration;
       (function frame(){
         confetti({particleCount: 2, angle: 60, spread: 55, origin: { x: 0 }});
         confetti({particleCount: 2, angle: 120, spread: 55, origin: { x: 1 }});
@@ -112,26 +158,32 @@
       })();
       confetti({ particleCount: 180, spread: 90, origin: { x: 0.5, y: 0.35 } });
     }
-
     window.addEventListener('load', burst);
     document.getElementById('replay').addEventListener('click', burst);
 
-    const shareBtn = document.getElementById('share');
-    shareBtn.addEventListener('click', async () => {
-      const url = new URL(location.href);
-      url.searchParams.set('title', title);
-      url.searchParams.set('msg', msg);
-      url.searchParams.set('name', name);
-      if(email) url.searchParams.set('email', email);
-      const toCopy = url.toString();
-      try{
-        await navigator.clipboard.writeText(toCopy);
-        shareBtn.textContent = "✅ Copied link";
-        setTimeout(()=>shareBtn.textContent="🔗 Copy link with my message", 1500);
-      }catch{
-        prompt("Copy this link:", toCopy);
-      }
+    // Feedback popup → opens prefilled email on Send
+    const modal = document.getElementById('modal');
+    const feedbackBtn = document.getElementById('feedbackBtn');
+    const cancelBtn = document.getElementById('cancel');
+    const sendBtn = document.getElementById('send');
+    const fbText = document.getElementById('fbText');
+
+    feedbackBtn.addEventListener('click', () => { modal.classList.add('open'); fbText.focus(); });
+    cancelBtn.addEventListener('click', () => modal.classList.remove('open'));
+    sendBtn.addEventListener('click', () => {
+      const body = encodeURIComponent(fbText.value + "\n\n— sent from the goodbye page:\n" + location.href);
+      const subject = encodeURIComponent(fbSub);
+      const to = fbTo || email || "";
+      if(!to){ alert("No feedback recipient configured."); return; }
+      const link = `mailto:${to}?subject=${subject}&body=${body}`;
+      window.location.href = link;
+      modal.classList.remove('open');
+      fbText.value = "";
     });
+
+    // Tiny hint to show how to customize (you can delete this line)
+    document.getElementById('hint').innerHTML =
+      `Tip: add <code>?title=...&msg=...&name=...&email=...&bg=yourimage.jpg&fb_to=you@example.com</code>`;
   </script>
 </body>
 </html>
