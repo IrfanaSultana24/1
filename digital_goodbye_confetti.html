@@ -7,7 +7,7 @@
   <style>
     :root{
       --bg1:#0f172a; --bg2:#1e293b;
-      --card:#0b1220cc; /* make more/less transparent by changing last 2 hex digits */
+      --card:#0b1220cc; /* adjust transparency via last 2 hex digits (b3≈70%, cc≈80%) */
       --text:#e2e8f0; --border:#1f2a44;
     }
     html,body{height:100%;margin:0}
@@ -20,7 +20,7 @@
       overflow-x:hidden;
     }
     .card{
-      position:relative; z-index:1; max-width:720px; width:min(92vw,720px);
+      position:relative; z-index:2; max-width:720px; width:min(92vw,720px);
       backdrop-filter: blur(12px);
       background: var(--card);
       border:1px solid var(--border); border-radius:20px;
@@ -39,34 +39,33 @@
     button:hover{ border-color:#475569; box-shadow:0 8px 20px rgba(0,0,0,.25); transform:translateY(-1px); }
 
     /* Modal */
-    .modal{ position:fixed; inset:0; display:none; z-index:20; align-items:center; justify-content:center; background:rgba(0,0,0,.45); padding:18px; }
+    .modal{ position:fixed; inset:0; display:none; z-index:3; align-items:center; justify-content:center; background:rgba(0,0,0,.45); padding:18px; }
     .modal.open{ display:flex; }
     .modal-card{ width:min(92vw,620px); background:#0b1220; border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:0 24px 60px rgba(0,0,0,.5); }
     .modal-card h2{ margin:0 0 10px; font-size:20px; }
     textarea{ width:100%; min-height:140px; resize:vertical; background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:12px; padding:10px; font-family:inherit; font-size:14px; }
     .modal-actions{ margin-top:12px; display:flex; gap:10px; justify-content:flex-end; }
 
-    /* Emoji rain */
-    .emoji { position:fixed; top:-60px; z-index:0; }
+    /* Emoji rain layer (behind card) */
+    .emoji { position:fixed; top:-60px; z-index:1; /* behind card */ }
     .emoji .inner{
       display:block; filter: drop-shadow(0 3px 6px rgba(0,0,0,.35));
+      animation: sway 3.5s ease-in-out infinite;
       transition: transform .15s ease;
-      animation: sway 3s ease-in-out infinite;
     }
-    .emoji:hover .inner{ transform: scale(1.3) rotate(6deg); }
+    .emoji:hover .inner{ transform: scale(1.25) rotate(6deg); }
     @keyframes fall { to { transform: translateY(110vh); opacity:1; } }
     @keyframes sway { 0%{ transform: translateX(0) rotate(0deg); }
-                      50%{ transform: translateX(var(--sx, 22px)) rotate(var(--rot, 10deg)); }
+                      50%{ transform: translateX(var(--sx, 26px)) rotate(var(--rot, 10deg)); }
                       100%{ transform: translateX(0) rotate(0deg); } }
 
-    /* Controls (small, unobtrusive) */
+    /* Controls */
     .controls{
-      position: fixed; right:14px; bottom:14px; z-index:5;
+      position: fixed; right:14px; bottom:14px; z-index:4;
       background:#0b1220cc; border:1px solid #1f2a44; border-radius:14px; padding:10px 12px;
-      font-size:12px; display:flex; gap:10px; align-items:center;
-      backdrop-filter: blur(8px);
+      font-size:12px; display:flex; gap:10px; align-items:center; backdrop-filter: blur(8px);
     }
-    .controls label{ opacity:.8; margin-right:4px; }
+    .controls label{ opacity:.85; margin-right:4px; }
     .controls input[type="range"]{ width:120px; }
     .controls select{ background:#0b1220; color:var(--text); border:1px solid #334155; border-radius:8px; padding:4px 6px; }
   </style>
@@ -82,17 +81,17 @@
     </div>
   </div>
 
-  <!-- Tiny controls to make it interactive -->
+  <!-- Controls -->
   <div class="controls" aria-label="Emoji rain controls">
     <button id="toggle">⏸ Pause</button>
     <label>Speed</label>
-    <input id="speed" type="range" min="0.5" max="2" step="0.1" value="0.8" />
-    <label>Density</label>
-    <input id="density" type="range" min="200" max="1500" step="50" value="900" />
+    <input id="speed" type="range" min="0.5" max="1.5" step="0.1" value="0.8" />
+    <label>Flow</label>
+    <input id="flow" type="range" min="200" max="1500" step="50" value="900" />
     <select id="pack">
-      <option value="classic">Classic 👋</option>
-      <option value="warm">Warm 🧡</option>
-      <option value="celebrate">Celebrate ✨</option>
+      <option value="professional" selected>Professional 👋🤝🙏</option>
+      <option value="warm">Warm 🫶🧡</option>
+      <option value="celebrate">Celebrate ✨🎈</option>
     </select>
   </div>
 
@@ -114,7 +113,7 @@
   <script>
     const qs = new URLSearchParams(location.search);
 
-    // Page content
+    // Content
     const title = qs.get('title') || "Thank you, team!";
     const msg   = qs.get('msg')   || "It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!";
     const name  = qs.get('name')  || "Irfana";
@@ -132,92 +131,101 @@
 
     /* ===================== Emoji rain ===================== */
     const PACKS = {
-      classic: ["👋","🤝","💐","🙏","💌","🕊️","🫶","😊","🌟","🧡"],
-      warm:    ["🫶","🧡","🌼","💐","🤗","🙏","👋","💌"],
-      celebrate:["🎈","✨","🌟","🎉","🥳","👋","🤝"]
+      professional: ["👋","🤝","🙏","👏","🫶","💼","📈","🧑‍💻","🧑‍💼","🕊️","✨"],
+      warm:         ["🫶","🧡","💐","🌼","🤗","🙏","👋","💌","😊","✨"],
+      celebrate:    ["🎈","✨","🌟","🎉","🥳","👋","🤝","💐"]
     };
-    let currentPack = "classic";
+    let currentPack = "professional";
 
-    // Controls
-    const speedSlider = document.getElementById('speed');     // lower = slower
-    const densitySlider = document.getElementById('density'); // higher = fewer
-    const packSelect = document.getElementById('pack');
-    const toggleBtn = document.getElementById('toggle');
-    const burstBtn  = document.getElementById('burst');
+    const speedSlider = document.getElementById('speed'); // lower = slower
+    const flowSlider  = document.getElementById('flow');  // bigger = fewer / slower stream
+    const packSelect  = document.getElementById('pack');
+    const toggleBtn   = document.getElementById('toggle');
+    const burstBtn    = document.getElementById('burst');
 
     let running = true;
     let emitterId = null;
 
     function rand(min,max){ return Math.random()*(max-min)+min; }
 
+    // Column-based emitter to guarantee full-width spread
+    let colIndex = 0;
+    function columns(){
+      const n = Math.max(8, Math.floor(window.innerWidth / 110)); // ~110px per column
+      const pad = 2; // vw edge padding
+      const step = (100 - pad*2) / (n - 1);
+      return { n, pad, step };
+    }
+
     function makeEmoji(xvw=null, yStart=-60){
+      const { n, pad, step } = columns();
+      // If no x specified, advance across columns with slight jitter (spreads across whole screen)
+      if (xvw == null){
+        xvw = pad + (colIndex * step) + rand(-step*0.25, step*0.25);
+        colIndex = (colIndex + 1) % n;
+      }
+
       const wrap = document.createElement('div');
       wrap.className = 'emoji';
       const span = document.createElement('span');
       span.className = 'inner';
-      span.textContent = PACKS[currentPack][Math.floor(Math.random()*PACKS[currentPack].length)];
+      const pack = PACKS[currentPack];
+      span.textContent = pack[Math.floor(Math.random()*pack.length)];
 
-      const left = xvw!=null ? xvw : rand(0,100);
-      const baseDur = rand(10,18);                  // slow fall 10–18s
-      const speedFactor = parseFloat(speedSlider.value); // 0.5–2
-      const dur = baseDur / speedFactor;            // slower when <1
+      const baseDur = rand(12,20);                   // slow fall 12–20s
+      const speedFactor = parseFloat(speedSlider.value); // 0.5–1.5
+      const dur = baseDur / speedFactor;
       const delay = rand(0, 1.2);
-      const size = rand(24, 44);                    // px
-      const sway = (Math.random()<.5?-1:1) * rand(12, 30);
+      const size = rand(24, 46);                     // px
+      const sway = (Math.random()<.5?-1:1) * rand(14, 32);
       const rot  = (Math.random()<.5?-1:1) * rand(5, 18) + "deg";
 
-      wrap.style.left = left + "vw";
+      wrap.style.left = xvw + "vw";
       wrap.style.top = yStart + "px";
       wrap.style.animation = `fall ${dur}s linear ${delay}s forwards`;
       span.style.fontSize = size + "px";
       span.style.setProperty('--sx', sway + "px");
       span.style.setProperty('--rot', rot);
 
-      // little interactions
-      wrap.addEventListener('mouseenter', () => span.style.transform = "scale(1.3) rotate(6deg)");
+      // interactions
+      wrap.addEventListener('mouseenter', () => span.style.transform = "scale(1.2) rotate(6deg)");
       wrap.addEventListener('mouseleave', () => span.style.transform = "");
       wrap.addEventListener('click', (e) => {
         e.stopPropagation();
-        span.style.transform = "scale(1.6) rotate(-8deg)";
+        span.style.transform = "scale(1.5) rotate(-8deg)";
         setTimeout(()=>wrap.remove(), 150);
-        // mini-burst near the click
-        burst(Math.max(2,Math.min(98, left)), 8);
+        burst(Math.max(2, Math.min(98, xvw)), 10);
       });
 
       wrap.appendChild(span);
       document.body.appendChild(wrap);
-      // cleanup
       setTimeout(()=>wrap.remove(), (dur+delay+0.5)*1000);
     }
 
-    // continuous emitter
     function startEmitter(){
       stopEmitter();
-      const interval = parseInt(densitySlider.value,10); // ms between spawns
+      const interval = parseInt(flowSlider.value, 10); // ms
       emitterId = setInterval(()=> makeEmoji(null), interval);
     }
     function stopEmitter(){ if(emitterId){ clearInterval(emitterId); emitterId = null; } }
 
-    // burst at a given x (vw)
-    function burst(xvw=50, count=14){
+    function burst(xvw=50, count=12){
       for(let i=0;i<count;i++){
-        // stagger a little for nicer effect
-        setTimeout(()=> makeEmoji(xvw + rand(-6,6), -60 - i*10), i*40);
+        setTimeout(()=> makeEmoji(xvw + rand(-8,8), -60 - i*8), i*50);
       }
     }
 
-    // Body click → friendly burst
+    // Background click → friendly burst
     document.body.addEventListener('click', (e) => {
-      // ignore clicks on controls or modal
       if(e.target.closest('.controls') || e.target.closest('.modal') || e.target.closest('.card')) return;
       const xvw = (e.clientX / window.innerWidth) * 100;
       burst(xvw);
     });
 
-    // Control handlers
-    speedSlider.addEventListener('input', ()=>{ /* affects new emojis */ });
-    densitySlider.addEventListener('input', startEmitter);
+    // Controls
     packSelect.addEventListener('change', ()=>{ currentPack = packSelect.value; });
+    speedSlider.addEventListener('input', ()=>{ /* affects new emojis only */ });
+    flowSlider.addEventListener('input', startEmitter);
     toggleBtn.addEventListener('click', ()=>{
       running = !running;
       if(running){ startEmitter(); toggleBtn.textContent = "⏸ Pause"; }
@@ -225,11 +233,10 @@
     });
     burstBtn.addEventListener('click', ()=> burst());
 
-    // Start!
+    // Start
     window.addEventListener('load', ()=>{
       startEmitter();
-      // a gentle initial burst
-      setTimeout(()=> burst(), 400);
+      setTimeout(()=> burst(), 500); // gentle welcome burst
     });
 
     // Respect reduced-motion
@@ -238,8 +245,6 @@
     }
 
     /* ================= Google Form direct submit (no email) ================= */
-    // From your pre-fill link:
-    // https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/viewform?usp=pp_url&entry.1175385091=...
     const GF_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/formResponse";
     const GF_FEEDBACK_FIELD = "entry.1175385091";
 
