@@ -22,12 +22,6 @@
       background: radial-gradient(1200px 800px at 10% 10%, var(--bg2), var(--bg1)); /* replaced by image if provided */
       background-size: cover; background-position: center; background-attachment: fixed;
     }
-    /* subtle dark overlay so text stays readable on photos */
-    body::before{
-      content:""; position:fixed; inset:0; pointer-events:none;
-      background: radial-gradient(1200px 800px at 10% 10%, rgba(2,6,23,.65), rgba(2,6,23,.8));
-      z-index:0;
-    }
     .card{
       position:relative; z-index:1;
       max-width: 720px; width: min(92vw, 720px);
@@ -187,4 +181,5 @@
   </script>
 </body>
 </html>
+
 
