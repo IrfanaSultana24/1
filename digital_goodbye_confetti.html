@@ -92,7 +92,6 @@
       <a id="mailto" class="btn ghost" href="#" aria-label="Stay in touch via email">💌 Stay in touch</a>
       <button id="feedbackBtn">💬 Leave feedback</button>
     </div>
-    <footer id="hint"></footer>
   </div>
 
   <!-- Feedback Modal -->
@@ -128,8 +127,7 @@
     // Background image if provided (?bg=yourimage.jpg or full URL)
     if(bg){
       const url = bg.match(/^https?:\/\//) ? bg : `${bg}`;
-      document.body.style.backgroundImage =
-        `linear-gradient(0deg, rgba(2,6,23,.65), rgba(2,6,23,.65)), url('${url}')`;
+      document.body.style.backgroundImage = `url('${url}')`;
       document.body.style.backgroundSize = 'cover';
       document.body.style.backgroundPosition = 'center';
     }
@@ -174,12 +172,10 @@
       modal.classList.remove('open');
       fbText.value = "";
     });
-
-    // Tiny hint to show how to customize (you can delete this line)
-    document.getElementById('hint').innerHTML =
   </script>
 </body>
 </html>
+
 
 
 
