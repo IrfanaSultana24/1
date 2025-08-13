@@ -7,8 +7,9 @@
   <style>
     :root{
       --bg1:#0f172a; --bg2:#1e293b;
-      --card:#0b1220c0; /* adjust transparency via last 2 hex digits (b3≈70%, c0≈75%) */
+      --card:#0b1220c0;  /* transparency: b3≈70%, c0≈75%, cc≈80% */
       --text:#e2e8f0; --border:#1f2a44;
+      --accent:#f59e0b;
     }
     html,body{height:100%;margin:0}
     body{
@@ -46,29 +47,68 @@
     textarea{ width:100%; min-height:140px; resize:vertical; background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:12px; padding:10px; font-family:inherit; font-size:14px; }
     .modal-actions{ margin-top:12px; display:flex; gap:10px; justify-content:flex-end; }
 
-    /* Emoji rain layer (behind card) */
+    /* Emoji rain (behind card) */
     .emoji { position:fixed; top:-60px; z-index:1; }
     .emoji .inner{
       display:block; filter: drop-shadow(0 3px 6px rgba(0,0,0,.35));
       animation: sway 3.6s ease-in-out infinite;
       transition: transform .15s ease;
     }
-    .emoji:hover .inner{ transform: scale(1.15) rotate(6deg); }
     @keyframes fall { to { transform: translateY(110vh); opacity:1; } }
     @keyframes sway { 0%{ transform: translateX(0) rotate(0deg); }
                       50%{ transform: translateX(var(--sx, 24px)) rotate(var(--rot, 10deg)); }
                       100%{ transform: translateX(0) rotate(0deg); } }
 
-    /* Sparkles for click feedback */
+    /* Micro-interactions */
+    @keyframes clapPulse {
+      0%{ transform: scale(1) rotate(0); }
+      20%{ transform: scale(0.92) rotate(-6deg); }
+      40%{ transform: scale(1.12) rotate(6deg); }
+      60%{ transform: scale(0.95) rotate(-3deg); }
+      80%{ transform: scale(1.08) rotate(3deg); }
+      100%{ transform: scale(1) rotate(0); }
+    }
+    @keyframes wave {
+      0%{ transform: rotate(0); }
+      25%{ transform: rotate(-18deg); }
+      50%{ transform: rotate(16deg); }
+      75%{ transform: rotate(-12deg); }
+      100%{ transform: rotate(0); }
+    }
+    @keyframes handshake {
+      0%{ transform: translateX(0) rotate(0); }
+      25%{ transform: translateX(-2px) rotate(-6deg); }
+      50%{ transform: translateX(2px) rotate(6deg); }
+      75%{ transform: translateX(-2px) rotate(-3deg); }
+      100%{ transform: translateX(0) rotate(0); }
+    }
+    @keyframes heartPop {
+      0%{ transform: scale(1); }
+      40%{ transform: scale(1.25); }
+      100%{ transform: scale(1); }
+    }
     .sparkle{
-      position: fixed; z-index:1; pointer-events:none;
+      position: fixed; z-index:1; pointer-events:none; color:#ffe08a;
       animation: upfade .8s ease-out forwards;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,.35));
     }
     @keyframes upfade{
-      0% { transform: translateY(0) scale(.9); opacity:0.9; }
-      100% { transform: translateY(-28px) scale(1.2); opacity:0; }
+      0% { transform: translateY(0) scale(.9); opacity:0.95; }
+      100% { transform: translateY(-28px) scale(1.15); opacity:0; }
     }
+    .plus{
+      position: fixed; z-index:1; pointer-events:none; color:var(--accent); font-weight:700;
+      animation: upfade .9s ease-out forwards; text-shadow:0 2px 6px rgba(0,0,0,.35);
+    }
+
+    /* Applause counter badge */
+    .applause{
+      position: fixed; left:14px; bottom:14px; z-index:4;
+      background:#0b1220cc; border:1px solid var(--border); border-radius:999px;
+      padding:8px 12px; display:flex; align-items:center; gap:8px; backdrop-filter: blur(8px);
+      font-weight:700;
+    }
+    .applause .dot{ width:10px; height:10px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 4px rgba(245,158,11,.15); }
   </style>
 </head>
 <body>
@@ -80,6 +120,11 @@
       <button id="applause">👏 Applause</button>
       <button id="feedbackBtn">💬 Leave feedback</button>
     </div>
+  </div>
+
+  <!-- Applause counter -->
+  <div class="applause" id="applauseBadge" aria-live="polite">
+    <div class="dot"></div><span>Applause:</span><span id="applauseCount">0</span>
   </div>
 
   <!-- Feedback Modal -->
@@ -116,57 +161,57 @@
       document.body.style.backgroundPosition = 'center';
     }
 
-    /* ===== Minimal, slow, full-width emoji rain ===== */
-    // Small, professional set
-    const PACK = ["👏","👋","🤝","🙏","🫶"];
+    /* ===== Minimal, slow, full-width emoji rain with cute interactions ===== */
+    const PACK = ["👏","👋","🤝","🙏","🫶"]; // professional + warm
 
-    // Tweak these to control clutter & speed
-    const MAX_ACTIVE = 18;      // max emojis on screen at once
-    let   FLOW_MS    = 1100;    // time between new emojis (bigger = fewer)
-    const DUR_RANGE  = [14, 22]; // fall duration in seconds (slow)
+    const MAX_ACTIVE = 16;      // cap to avoid clutter
+    let   FLOW_MS    = 1200;    // spawn interval (bigger = fewer)
+    const DUR_RANGE  = [14, 22]; // fall duration (seconds)
 
+    const applauseCountEl = document.getElementById('applauseCount');
+    let applauseCount = 0;
+
+    function rand(min,max){ return Math.random()*(max-min)+min; }
+
+    // Columns to spread across the screen
     let colIndex = 0;
     function columns(){
       const n = Math.max(8, Math.floor(window.innerWidth / 120)); // ~120px per column
-      const pad = 2; // vw padding at edges
+      const pad = 2; // vw
       const step = (100 - pad*2) / (n - 1);
       return { n, pad, step };
     }
 
-    function rand(min,max){ return Math.random()*(max-min)+min; }
-
-    function sparkleAt(x, y){
-      for(let i=0;i<3;i++){
-        const s = document.createElement('div');
-        s.className = 'sparkle';
-        s.textContent = "✨";
-        s.style.left = (x + rand(-12,12)) + "px";
-        s.style.top  = (y + rand(-6,6)) + "px";
-        s.style.fontSize = (18 + Math.random()*6) + "px";
-        document.body.appendChild(s);
-        setTimeout(()=>s.remove(), 900);
-      }
+    function sparkleAt(x, y, txt="✨", cls="sparkle"){
+      const s = document.createElement('div');
+      s.className = cls;
+      s.textContent = txt;
+      s.style.left = x + "px";
+      s.style.top  = y + "px";
+      s.style.fontSize = (cls==="plus"? "16px" : (18 + Math.random()*6) + "px");
+      document.body.appendChild(s);
+      setTimeout(()=>s.remove(), 900);
     }
 
     function makeEmoji(xvw=null, yStart=-60){
-      // Respect cap
       if (document.querySelectorAll('.emoji').length >= MAX_ACTIVE) return;
 
       const { n, pad, step } = columns();
       if (xvw == null){
         xvw = pad + (colIndex * step) + rand(-step*0.2, step*0.2);
-        colIndex = (colIndex + 1) % n; // sweep across columns
+        colIndex = (colIndex + 1) % n;
       }
 
       const wrap = document.createElement('div');
       wrap.className = 'emoji';
       const span = document.createElement('span');
       span.className = 'inner';
-      span.textContent = PACK[Math.floor(Math.random()*PACK.length)];
+      const ch = PACK[Math.floor(Math.random()*PACK.length)];
+      span.textContent = ch;
 
       const baseDur = rand(DUR_RANGE[0], DUR_RANGE[1]);
       const delay = rand(0, 0.8);
-      const size = rand(26, 42);                 // px
+      const size = rand(26, 42);
       const sway = (Math.random()<.5?-1:1) * rand(12, 28);
       const rot  = (Math.random()<.5?-1:1) * rand(5, 16) + "deg";
 
@@ -177,13 +222,35 @@
       span.style.setProperty('--sx', sway + "px");
       span.style.setProperty('--rot', rot);
 
-      // Interactions
+      // Click reactions per emoji type
       wrap.addEventListener('click', (e) => {
         e.stopPropagation();
-        const rect = span.getBoundingClientRect();
-        sparkleAt(rect.left + rect.width/2, rect.top + rect.height/2);
-        span.style.transform = "scale(1.4) rotate(-6deg)";
-        setTimeout(()=>wrap.remove(), 120);
+        const r = span.getBoundingClientRect();
+        if (ch === "👏"){
+          // clap animation + count + sparkles
+          span.style.animation = "clapPulse .5s ease-in-out 3";
+          applauseCount++;
+          applauseCountEl.textContent = applauseCount;
+          sparkleAt(r.left + r.width/2, r.top, "+1", "plus");
+          for(let i=0;i<2;i++) sparkleAt(r.left + rand(0,r.width), r.top + rand(0,r.height));
+          setTimeout(()=>wrap.remove(), 400);
+        } else if (ch === "👋"){
+          span.style.animation = "wave .6s ease-in-out 2";
+          sparkleAt(r.left + r.width/2, r.top, "👋", "plus");
+          setTimeout(()=>wrap.remove(), 420);
+        } else if (ch === "🤝"){
+          span.style.animation = "handshake .5s ease-in-out 2";
+          sparkleAt(r.left + r.width/2, r.top, "🤝", "plus");
+          setTimeout(()=>wrap.remove(), 420);
+        } else if (ch === "🫶"){
+          span.style.animation = "heartPop .5s ease-in-out 2";
+          sparkleAt(r.left + r.width/2, r.top, "🫶", "plus");
+          setTimeout(()=>wrap.remove(), 420);
+        } else if (ch === "🙏"){
+          span.style.animation = "heartPop .5s ease-in-out 1";
+          sparkleAt(r.left + r.width/2, r.top, "🙏", "plus");
+          setTimeout(()=>wrap.remove(), 420);
+        }
       });
 
       wrap.appendChild(span);
@@ -193,13 +260,10 @@
 
     // Continuous emitter
     let emitterId = null;
-    function startEmitter(){
-      stopEmitter();
-      emitterId = setInterval(()=> makeEmoji(null), FLOW_MS);
-    }
+    function startEmitter(){ stopEmitter(); emitterId = setInterval(()=> makeEmoji(null), FLOW_MS); }
     function stopEmitter(){ if(emitterId){ clearInterval(emitterId); emitterId = null; } }
 
-    // Small applause burst
+    // Applause burst
     function burst(count=8){
       const mid = (window.innerWidth / 2);
       for(let i=0;i<count;i++){
@@ -207,16 +271,18 @@
         const xvw = (xpx / window.innerWidth) * 100;
         setTimeout(()=> makeEmoji(xvw, -60 - i*6), i*60);
       }
+      // bump counter a little (fun)
+      applauseCount += Math.ceil(count/3);
+      applauseCountEl.textContent = applauseCount;
     }
 
-    // Start
     window.addEventListener('load', ()=>{
       startEmitter();
       setTimeout(()=> burst(10), 400); // gentle welcome burst
     });
     document.getElementById('applause').addEventListener('click', ()=> burst(12));
 
-    // Background click → tiny sparkle (no extra emojis)
+    // Background click → tiny sparkles (no extra emojis)
     document.body.addEventListener('click', (e) => {
       if(e.target.closest('.modal') || e.target.closest('.card')) return;
       sparkleAt(e.clientX, e.clientY);
@@ -228,8 +294,6 @@
     }
 
     /* ===== Google Form direct submit (no email) ===== */
-    // From your prefill link:
-    // https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/viewform?usp=pp_url&entry.1175385091=...
     const GF_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/formResponse";
     const GF_FEEDBACK_FIELD = "entry.1175385091";
 
