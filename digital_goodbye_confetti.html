@@ -6,63 +6,41 @@
   <title>🎉 A Little Goodbye</title>
   <style>
     :root{
-      --bg1:#0f172a; /* fallback if no image */
-      --bg2:#1e293b;
-      --card:#0b1220dd;   /* make lighter like #0b1220b3 for more transparency */
-      --text:#e2e8f0;
-      --accent:#38bdf8;
-      --accent2:#a78bfa;
-      --border:#1f2a44;
+      --bg1:#0f172a; --bg2:#1e293b;
+      --card:#0b1220cc; /* adjust opacity here (cc ≈ 80%). e.g., b3 = 70% */
+      --text:#e2e8f0; --border:#1f2a44;
     }
     html,body{height:100%;margin:0}
     body{
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial;
       color:var(--text);
       display:grid; place-items:center;
-      background: radial-gradient(1200px 800px at 10% 10%, var(--bg2), var(--bg1)); /* replaced by image if provided */
+      background: radial-gradient(1200px 800px at 10% 10%, var(--bg2), var(--bg1));
       background-size: cover; background-position: center; background-attachment: fixed;
     }
     .card{
-      position:relative; z-index:1;
-      max-width: 720px; width: min(92vw, 720px);
+      position:relative; z-index:1; max-width: 720px; width:min(92vw,720px);
       backdrop-filter: blur(12px);
       background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 28px 28px 22px;
-      box-shadow: 0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+      border:1px solid var(--border); border-radius:20px;
+      padding:28px 28px 22px; box-shadow:0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
       overflow:hidden;
     }
-    h1{ font-size: clamp(28px, 5vw, 44px); margin:8px 0 10px; line-height:1.1; }
-    .msg{ font-size: clamp(16px, 2.6vw, 20px); opacity:.92; margin:0 0 14px; }
+    h1{ font-size: clamp(28px,5vw,44px); margin:8px 0 10px; line-height:1.1; }
+    .msg{ font-size: clamp(16px,2.6vw,20px); opacity:.92; margin:0 0 14px; }
     .meta{ opacity:.8; font-size:14px; margin-top:6px; }
     .row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
-    button, a.btn{
+    button{
       appearance:none; border:1px solid #334155; background:#0b1220; color:var(--text);
-      padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600; text-decoration:none;
+      padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600;
       transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease;
     }
-    button:hover, a.btn:hover{ border-color:#475569; box-shadow:0 8px 20px rgba(0,0,0,.25); transform:translateY(-1px); }
-    .ghost{ background:transparent }
-
-    /* Feedback modal */
-    .modal{
-      position: fixed; inset:0; display:none; z-index:20;
-      align-items:center; justify-content:center;
-      background: rgba(0,0,0,.45);
-      padding: 18px;
-    }
+    button:hover{ border-color:#475569; box-shadow:0 8px 20px rgba(0,0,0,.25); transform:translateY(-1px); }
+    .modal{ position:fixed; inset:0; display:none; z-index:20; align-items:center; justify-content:center; background:rgba(0,0,0,.45); padding:18px; }
     .modal.open{ display:flex; }
-    .modal-card{
-      width:min(92vw, 620px); background:#0b1220; border:1px solid var(--border);
-      border-radius:16px; padding:18px; box-shadow:0 24px 60px rgba(0,0,0,.5);
-    }
+    .modal-card{ width:min(92vw,620px); background:#0b1220; border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:0 24px 60px rgba(0,0,0,.5); }
     .modal-card h2{ margin:0 0 10px; font-size:20px; }
-    textarea{
-      width:100%; min-height:140px; resize:vertical;
-      background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:12px; padding:10px;
-      font-family: inherit; font-size:14px;
-    }
+    textarea{ width:100%; min-height:140px; resize:vertical; background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:12px; padding:10px; font-family:inherit; font-size:14px; }
     .modal-actions{ margin-top:12px; display:flex; gap:10px; justify-content:flex-end; }
     canvas#confetti{ position:fixed; inset:0; pointer-events:none; z-index:10;}
   </style>
@@ -79,7 +57,7 @@
 
     <div class="row">
       <button id="replay">🎊 Replay confetti</button>
-      <a id="mailto" class="btn ghost" href="#" aria-label="Stay in touch via email">💌 Stay in touch</a>
+      <!-- Removed the mailto "Stay in touch" button to avoid any email pop-ups -->
       <button id="feedbackBtn">💬 Leave feedback</button>
     </div>
   </div>
@@ -96,6 +74,9 @@
     </div>
   </div>
 
+  <!-- Hidden target so the Google Form submission doesn't leave your page -->
+  <iframe name="gform-target" style="display:none"></iframe>
+
   <!-- Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   <script>
@@ -105,8 +86,7 @@
     const title = qs.get('title') || "Thank you, team!";
     const msg   = qs.get('msg')   || "It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!";
     const name  = qs.get('name')  || "Irfana";
-    const email = qs.get('email') || "irfanasultana24@gmail.com";  // for the "Stay in touch" button
-    const bg    = qs.get('bg')    || "1.jpeg";                     // default background image
+    const bg    = qs.get('bg')    || "1.jpeg";
 
     document.getElementById('title').textContent = title;
     document.getElementById('message').textContent = msg;
@@ -115,17 +95,9 @@
     // Background image
     if (bg) {
       const url = bg.match(/^https?:\/\//) ? bg : `${bg}`;
-      document.body.style.backgroundImage = `url('${url}')`;  // no overlay
+      document.body.style.backgroundImage = `url('${url}')`;
       document.body.style.backgroundSize = 'cover';
       document.body.style.backgroundPosition = 'center';
-    }
-
-    // Mailto button
-    const mailto = document.getElementById('mailto');
-    if (email) {
-      mailto.href = `mailto:${email}`;
-    } else {
-      mailto.style.display = 'none';
     }
 
     // Confetti
@@ -141,11 +113,12 @@
     window.addEventListener('load', burst);
     document.getElementById('replay').addEventListener('click', burst);
 
-    // === Google Form configuration (from your pre-fill link) ===
-    const GOOGLE_FORM_BASE = "https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/viewform?usp=pp_url";
-    const GF_FEEDBACK_FIELD = "entry.1175385091"; // "Your Feedback"
+    // === Google Form direct submit (no email, no extra page) ===
+    // From your pre-fill link:
+    // https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/viewform?usp=pp_url&entry.1175385091=...
+    const GF_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/formResponse";
+    const GF_FEEDBACK_FIELD = "entry.1175385091";
 
-    // Feedback popup → opens Google Form prefilled; user just clicks Submit
     const modal = document.getElementById('modal');
     const feedbackBtn = document.getElementById('feedbackBtn');
     const cancelBtn = document.getElementById('cancel');
@@ -159,11 +132,23 @@
       const message = fbText.value.trim();
       if (!message){ alert("Please write a quick note first."); return; }
 
-      const url = new URL(GOOGLE_FORM_BASE);
-      // include page link for context
-      url.searchParams.set(GF_FEEDBACK_FIELD, `${message}\n\n— sent from: ${location.href}`);
+      // Build and submit a hidden HTML form to Google Forms
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = GF_ACTION;
+      form.target = 'gform-target';
 
-      window.open(url.toString(), "_blank"); // open prefilled form
+      // feedback
+      const msgInput = document.createElement('textarea');
+      msgInput.name = GF_FEEDBACK_FIELD;
+      msgInput.value = `${message}\n\n— sent from: ${location.href}`;
+      form.appendChild(msgInput);
+
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+
+      alert("Thanks! Your feedback was sent ✅");
       modal.classList.remove('open');
       fbText.value = "";
     });
