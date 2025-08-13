@@ -7,7 +7,7 @@
   <style>
     :root{
       --bg1:#0f172a; --bg2:#1e293b;
-      --card:#0b1220cc; /* adjust opacity here (cc ≈ 80%). e.g., b3 = 70% */
+      --card:#0b1220cc; /* make more/less transparent by changing last two hex digits */
       --text:#e2e8f0; --border:#1f2a44;
     }
     html,body{height:100%;margin:0}
@@ -17,14 +17,15 @@
       display:grid; place-items:center;
       background: radial-gradient(1200px 800px at 10% 10%, var(--bg2), var(--bg1));
       background-size: cover; background-position: center; background-attachment: fixed;
+      overflow-x:hidden;
     }
     .card{
-      position:relative; z-index:1; max-width: 720px; width:min(92vw,720px);
+      position:relative; z-index:1; max-width:720px; width:min(92vw,720px);
       backdrop-filter: blur(12px);
       background: var(--card);
       border:1px solid var(--border); border-radius:20px;
-      padding:28px 28px 22px; box-shadow:0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
-      overflow:hidden;
+      padding:28px 28px 22px;
+      box-shadow:0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
     }
     h1{ font-size: clamp(28px,5vw,44px); margin:8px 0 10px; line-height:1.1; }
     .msg{ font-size: clamp(16px,2.6vw,20px); opacity:.92; margin:0 0 14px; }
@@ -36,28 +37,34 @@
       transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease;
     }
     button:hover{ border-color:#475569; box-shadow:0 8px 20px rgba(0,0,0,.25); transform:translateY(-1px); }
+
+    /* Modal */
     .modal{ position:fixed; inset:0; display:none; z-index:20; align-items:center; justify-content:center; background:rgba(0,0,0,.45); padding:18px; }
     .modal.open{ display:flex; }
     .modal-card{ width:min(92vw,620px); background:#0b1220; border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:0 24px 60px rgba(0,0,0,.5); }
     .modal-card h2{ margin:0 0 10px; font-size:20px; }
     textarea{ width:100%; min-height:140px; resize:vertical; background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:12px; padding:10px; font-family:inherit; font-size:14px; }
     .modal-actions{ margin-top:12px; display:flex; gap:10px; justify-content:flex-end; }
-    canvas#confetti{ position:fixed; inset:0; pointer-events:none; z-index:10;}
+
+    /* Emoji rain */
+    .emoji { position:fixed; top:-60px; pointer-events:none; z-index:0; /* behind the card */ }
+    .emoji .inner{
+      display:block; filter: drop-shadow(0 3px 6px rgba(0,0,0,.35));
+      animation: sway 3s ease-in-out infinite;
+    }
+    @keyframes fall { to { transform: translateY(110vh); opacity:1; } }
+    @keyframes sway { 0%{ transform: translateX(0) rotate(0deg); }
+                      50%{ transform: translateX(var(--sx, 22px)) rotate(var(--rot, 10deg)); }
+                      100%{ transform: translateX(0) rotate(0deg); } }
   </style>
 </head>
 <body>
-  <canvas id="confetti"></canvas>
-
   <div class="card">
     <h1 id="title">Thank you, team!</h1>
-    <p class="msg" id="message">
-      It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!
-    </p>
+    <p class="msg" id="message">It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!</p>
     <p class="meta" id="signature">— Irfana</p>
-
     <div class="row">
-      <button id="replay">🎊 Replay confetti</button>
-      <!-- Removed the mailto "Stay in touch" button to avoid any email pop-ups -->
+      <button id="replay">🤝 Replay animation</button>
       <button id="feedbackBtn">💬 Leave feedback</button>
     </div>
   </div>
@@ -74,11 +81,9 @@
     </div>
   </div>
 
-  <!-- Hidden target so the Google Form submission doesn't leave your page -->
+  <!-- Hidden iframe target for Google Form submission -->
   <iframe name="gform-target" style="display:none"></iframe>
 
-  <!-- Confetti -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   <script>
     const qs = new URLSearchParams(location.search);
 
@@ -92,7 +97,6 @@
     document.getElementById('message').textContent = msg;
     document.getElementById('signature').textContent = `— ${name}`;
 
-    // Background image
     if (bg) {
       const url = bg.match(/^https?:\/\//) ? bg : `${bg}`;
       document.body.style.backgroundImage = `url('${url}')`;
@@ -100,20 +104,44 @@
       document.body.style.backgroundPosition = 'center';
     }
 
-    // Confetti
-    function burst(){
-      const duration = 2000, end = Date.now() + duration;
-      (function frame(){
-        confetti({particleCount: 2, angle: 60, spread: 55, origin: { x: 0 }});
-        confetti({particleCount: 2, angle: 120, spread: 55, origin: { x: 1 }});
-        if(Date.now() < end) requestAnimationFrame(frame);
-      })();
-      confetti({ particleCount: 180, spread: 90, origin: { x: 0.5, y: 0.35 } });
-    }
-    window.addEventListener('load', burst);
-    document.getElementById('replay').addEventListener('click', burst);
+    /* ========== Emoji rain (👋 🤝) ========== */
+    const EMOJIS = ["👋","🤝","💐"]; // edit to taste
 
-    // === Google Form direct submit (no email, no extra page) ===
+    function emojiRain(count=36){
+      for(let i=0;i<count;i++){
+        const wrap = document.createElement('div');
+        wrap.className = 'emoji';
+        const span = document.createElement('span');
+        span.className = 'inner';
+        span.textContent = EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
+
+        // random sizes/positions
+        const left = Math.random()*100; // vw
+        const dur  = 6 + Math.random()*4; // 6–10s
+        const delay= Math.random()*1.2;   // 0–1.2s
+        const size = 26 + Math.random()*22; // px
+        const sway = (Math.random()<.5?-1:1) * (12 + Math.random()*24); // px
+        const rot  = (Math.random()<.5?-1:1) * (5 + Math.random()*20) + "deg";
+
+        wrap.style.left = left + "vw";
+        wrap.style.animation = `fall ${dur}s linear ${delay}s forwards`;
+        span.style.fontSize = size + "px";
+        span.style.setProperty('--sx', sway + "px");
+        span.style.setProperty('--rot', rot);
+
+        wrap.appendChild(span);
+        document.body.appendChild(wrap);
+
+        // cleanup
+        setTimeout(()=>wrap.remove(), (dur+delay+0.5)*1000);
+      }
+    }
+
+    // play on load and on click
+    window.addEventListener('load', () => emojiRain());
+    document.getElementById('replay').addEventListener('click', () => emojiRain());
+
+    /* ========== Google Form direct submit (no email) ========== */
     // From your pre-fill link:
     // https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/viewform?usp=pp_url&entry.1175385091=...
     const GF_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/formResponse";
@@ -132,13 +160,11 @@
       const message = fbText.value.trim();
       if (!message){ alert("Please write a quick note first."); return; }
 
-      // Build and submit a hidden HTML form to Google Forms
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = GF_ACTION;
       form.target = 'gform-target';
 
-      // feedback
       const msgInput = document.createElement('textarea');
       msgInput.name = GF_FEEDBACK_FIELD;
       msgInput.value = `${message}\n\n— sent from: ${location.href}`;
