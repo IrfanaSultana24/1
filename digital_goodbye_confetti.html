@@ -1,115 +1,89 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>👋 A Little Goodbye</title>
-  <style>
-    :root{
-      --bg1:#0f172a; --bg2:#1e293b;
-      --card:#0b1220c0;  /* transparency: b3≈70%, c0≈75%, cc≈80% */
-      --text:#e2e8f0; --border:#1f2a44;
-      --accent:#f59e0b;
-    }
-    html,body{height:100%;margin:0}
-    body{
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial;
-      color:var(--text);
-      display:grid; place-items:center;
-      background: radial-gradient(1200px 800px at 10% 10%, var(--bg2), var(--bg1));
-      background-size: cover; background-position: center; background-attachment: fixed;
-      overflow-x:hidden;
-    }
-    .card{
-      position:relative; z-index:2; max-width:720px; width:min(92vw,720px);
-      backdrop-filter: blur(12px);
-      background: var(--card);
-      border:1px solid var(--border); border-radius:20px;
-      padding:28px 28px 22px;
-      box-shadow:0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
-    }
-    h1{ font-size: clamp(28px,5vw,44px); margin:8px 0 10px; line-height:1.1; }
-    .msg{ font-size: clamp(16px,2.6vw,20px); opacity:.92; margin:0 0 14px; }
-    .meta{ opacity:.8; font-size:14px; margin-top:6px; }
-    .row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
-    button{
-      appearance:none; border:1px solid #334155; background:#0b1220; color:var(--text);
-      padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600;
-      transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease;
-    }
-    button:hover{ border-color:#475569; box-shadow:0 8px 20px rgba(0,0,0,.25); transform:translateY(-1px); }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>👋 A Little Goodbye</title>
+<style>
+  :root{
+    --bg1:#0f172a; --bg2:#1e293b;
+    --card:#0b1220c0;  /* transparency: b3≈70%, c0≈75%, cc≈80% */
+    --text:#e2e8f0; --border:#1f2a44; --accent:#f59e0b; --ok:#22c55e;
+  }
+  html,body{height:100%;margin:0}
+  body{
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial;
+    color:var(--text);
+    display:grid; place-items:center;
+    background: radial-gradient(1200px 800px at 10% 10%, var(--bg2), var(--bg1));
+    background-size: cover; background-position: center; background-attachment: fixed;
+    overflow-x:hidden;
+  }
+  .card{
+    position:relative; z-index:3; max-width:720px; width:min(92vw,720px);
+    backdrop-filter: blur(12px);
+    background: var(--card);
+    border:1px solid var(--border); border-radius:20px;
+    padding:28px 28px 20px;
+    box-shadow:0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  h1{ font-size: clamp(28px,5vw,44px); margin:8px 0 10px; line-height:1.1; }
+  .msg{ font-size: clamp(16px,2.6vw,20px); opacity:.92; margin:0 0 14px; }
+  .meta{ opacity:.8; font-size:14px; margin-top:6px; }
+  .row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+  button{
+    appearance:none; border:1px solid #334155; background:#0b1220; color:var(--text);
+    padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600;
+    transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  button:hover{ border-color:#475569; box-shadow:0 8px 20px rgba(0,0,0,.25); transform:translateY(-1px); }
 
-    /* Modal */
-    .modal{ position:fixed; inset:0; display:none; z-index:3; align-items:center; justify-content:center; background:rgba(0,0,0,.45); padding:18px; }
-    .modal.open{ display:flex; }
-    .modal-card{ width:min(92vw,620px); background:#0b1220; border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:0 24px 60px rgba(0,0,0,.5); }
-    .modal-card h2{ margin:0 0 10px; font-size:20px; }
-    textarea{ width:100%; min-height:140px; resize:vertical; background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:12px; padding:10px; font-family:inherit; font-size:14px; }
-    .modal-actions{ margin-top:12px; display:flex; gap:10px; justify-content:flex-end; }
+  /* tiny terminal for engineer-y sign-off */
+  .term{
+    margin-top:16px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size:13px; background:#0b1220; border:1px solid #233044; border-radius:12px; padding:10px 12px;
+    color:#cbd5e1; min-height:42px;
+  }
+  .ok{ color:var(--ok); font-weight:700; }
 
-    /* Emoji rain (behind card) */
-    .emoji { position:fixed; top:-60px; z-index:1; }
-    .emoji .inner{
-      display:block; filter: drop-shadow(0 3px 6px rgba(0,0,0,.35));
-      animation: sway 3.6s ease-in-out infinite;
-      transition: transform .15s ease;
-    }
-    @keyframes fall { to { transform: translateY(110vh); opacity:1; } }
-    @keyframes sway { 0%{ transform: translateX(0) rotate(0deg); }
-                      50%{ transform: translateX(var(--sx, 24px)) rotate(var(--rot, 10deg)); }
-                      100%{ transform: translateX(0) rotate(0deg); } }
+  /* Emoji rain layer */
+  .emoji { position:fixed; top:-60px; z-index:1; }
+  .emoji .inner{
+    display:block; filter: drop-shadow(0 3px 6px rgba(0,0,0,.35));
+    animation: sway 3.6s ease-in-out infinite;
+  }
+  @keyframes fall { to { transform: translateY(110vh); } }
+  @keyframes sway { 0%{ transform: translateX(0) rotate(0deg); }
+                    50%{ transform: translateX(var(--sx, 24px)) rotate(var(--rot, 10deg)); }
+                    100%{ transform: translateX(0) rotate(0deg); } }
 
-    /* Micro-interactions */
-    @keyframes clapPulse {
-      0%{ transform: scale(1) rotate(0); }
-      20%{ transform: scale(0.92) rotate(-6deg); }
-      40%{ transform: scale(1.12) rotate(6deg); }
-      60%{ transform: scale(0.95) rotate(-3deg); }
-      80%{ transform: scale(1.08) rotate(3deg); }
-      100%{ transform: scale(1) rotate(0); }
-    }
-    @keyframes wave {
-      0%{ transform: rotate(0); }
-      25%{ transform: rotate(-18deg); }
-      50%{ transform: rotate(16deg); }
-      75%{ transform: rotate(-12deg); }
-      100%{ transform: rotate(0); }
-    }
-    @keyframes handshake {
-      0%{ transform: translateX(0) rotate(0); }
-      25%{ transform: translateX(-2px) rotate(-6deg); }
-      50%{ transform: translateX(2px) rotate(6deg); }
-      75%{ transform: translateX(-2px) rotate(-3deg); }
-      100%{ transform: translateX(0) rotate(0); }
-    }
-    @keyframes heartPop {
-      0%{ transform: scale(1); }
-      40%{ transform: scale(1.25); }
-      100%{ transform: scale(1); }
-    }
-    .sparkle{
-      position: fixed; z-index:1; pointer-events:none; color:#ffe08a;
-      animation: upfade .8s ease-out forwards;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,.35));
-    }
-    @keyframes upfade{
-      0% { transform: translateY(0) scale(.9); opacity:0.95; }
-      100% { transform: translateY(-28px) scale(1.15); opacity:0; }
-    }
-    .plus{
-      position: fixed; z-index:1; pointer-events:none; color:var(--accent); font-weight:700;
-      animation: upfade .9s ease-out forwards; text-shadow:0 2px 6px rgba(0,0,0,.35);
-    }
+  /* Micro-interactions */
+  @keyframes clapPulse { 0%{transform:scale(1) rotate(0)}20%{transform:scale(.92) rotate(-6deg)}
+    40%{transform:scale(1.12) rotate(6deg)}60%{transform:scale(.95) rotate(-3deg)}
+    80%{transform:scale(1.08) rotate(3deg)}100%{transform:scale(1) rotate(0)} }
+  @keyframes wave { 0%{transform:rotate(0)}25%{transform:rotate(-18deg)}50%{transform:rotate(16deg)}75%{transform:rotate(-12deg)}100%{transform:rotate(0)} }
+  @keyframes handshake { 0%{transform:translateX(0) rotate(0)}25%{transform:translateX(-2px) rotate(-6deg)}
+    50%{transform:translateX(2px) rotate(6deg)}75%{transform:translateX(-2px) rotate(-3deg)}100%{transform:translateX(0) rotate(0)} }
+  @keyframes heartPop { 0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)} }
 
-    /* Applause counter badge */
-    .applause{
-      position: fixed; left:14px; bottom:14px; z-index:4;
-      background:#0b1220cc; border:1px solid var(--border); border-radius:999px;
-      padding:8px 12px; display:flex; align-items:center; gap:8px; backdrop-filter: blur(8px);
-      font-weight:700;
-    }
-    .applause .dot{ width:10px; height:10px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 4px rgba(245,158,11,.15); }
-  </style>
+  /* Click feedback */
+  .sparkle{ position: fixed; z-index:2; pointer-events:none; color:#ffe08a; animation: upfade .8s ease-out forwards; }
+  .plus{ position: fixed; z-index:2; pointer-events:none; color:var(--accent); font-weight:700; animation: upfade .9s ease-out forwards; }
+  @keyframes upfade{ 0%{ transform: translateY(0) scale(.9); opacity:.95; } 100%{ transform: translateY(-28px) scale(1.15); opacity:0; } }
+
+  /* Applause counter */
+  .applause{
+    position: fixed; left:14px; bottom:14px; z-index:4; background:#0b1220cc;
+    border:1px solid var(--border); border-radius:999px; padding:8px 12px; display:flex; gap:8px; align-items:center; backdrop-filter:blur(8px);
+    font-weight:700;
+  }
+  .applause .dot{ width:10px; height:10px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 4px rgba(245,158,11,.15); }
+
+  /* Rocket path */
+  @keyframes launch { 0%{ transform: translate(-10vw, 10vh) rotate(45deg) scale(.9); opacity:.9; }
+                      100%{ transform: translate(60vw,-90vh) rotate(20deg) scale(1.1); opacity:0; } }
+  .rocket{ position:fixed; left:0; bottom:0; z-index:2; font-size:34px; animation: launch 2.8s ease-out forwards; filter:drop-shadow(0 4px 8px rgba(0,0,0,.35)); }
+</style>
 </head>
 <body>
   <div class="card">
@@ -118,215 +92,164 @@
     <p class="meta" id="signature">— Irfana</p>
     <div class="row">
       <button id="applause">👏 Applause</button>
+      <button id="ship">🚀 Ship it</button>
       <button id="feedbackBtn">💬 Leave feedback</button>
     </div>
+    <div class="term" id="term" aria-live="polite"></div>
   </div>
 
-  <!-- Applause counter -->
-  <div class="applause" id="applauseBadge" aria-live="polite">
-    <div class="dot"></div><span>Applause:</span><span id="applauseCount">0</span>
-  </div>
+  <div class="applause" id="applauseBadge"><div class="dot"></div><span>Applause:</span><span id="applauseCount">0</span></div>
 
   <!-- Feedback Modal -->
-  <div class="modal" id="modal">
+  <div class="modal" id="modal" style="display:none">
     <div class="modal-card">
       <h2>💬 Share your feedback</h2>
-      <textarea id="fbText" placeholder="Write a quick note..."></textarea>
-      <div class="modal-actions">
+      <textarea id="fbText" placeholder="Write a quick note..." style="width:100%;min-height:140px;background:#0f172a;color:var(--text);border:1px solid #334155;border-radius:12px;padding:10px;font-family:inherit;font-size:14px;"></textarea>
+      <div class="row" style="margin-top:12px;justify-content:flex-end">
         <button id="cancel">Cancel</button>
         <button id="send">Send</button>
       </div>
     </div>
   </div>
 
-  <!-- Hidden iframe target for Google Form submission -->
   <iframe name="gform-target" style="display:none"></iframe>
 
-  <script>
-    const qs = new URLSearchParams(location.search);
+<script>
+  const qs = new URLSearchParams(location.search);
+  const title = qs.get('title') || "Thank you, team!";
+  const msg   = qs.get('msg')   || "It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!";
+  const name  = qs.get('name')  || "Irfana";
+  const bg    = qs.get('bg')    || "1.jpeg";
+  document.getElementById('title').textContent = title;
+  document.getElementById('message').textContent = msg;
+  document.getElementById('signature').textContent = `— ${name}`;
+  if (bg){ const url = bg.match(/^https?:\/\//) ? bg : `${bg}`; document.body.style.backgroundImage = `url('${url}')`; }
 
-    /* ===== Page content ===== */
-    const title = qs.get('title') || "Thank you, team!";
-    const msg   = qs.get('msg')   || "It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!";
-    const name  = qs.get('name')  || "Irfana";
-    const bg    = qs.get('bg')    || "1.jpeg";
+  /* ---------- Professional + engineer emoji packs ---------- */
+  const PACK_PRO  = ["👏","👋","🤝","🙏","🫶"];
+  const PACK_DEV  = ["👋","🤝","🧑‍💻","💻","⚙️","🧠","📈","✨"]; // toggle with ?pack=digital
+  const PACK = (qs.get('pack') === 'digital') ? PACK_DEV : PACK_PRO;
 
-    document.getElementById('title').textContent = title;
-    document.getElementById('message').textContent = msg;
-    document.getElementById('signature').textContent = `— ${name}`;
-    if (bg) {
-      const url = bg.match(/^https?:\/\//) ? bg : `${bg}`;
-      document.body.style.backgroundImage = `url('${url}')`;
-      document.body.style.backgroundSize = 'cover';
-      document.body.style.backgroundPosition = 'center';
-    }
+  /* ---------- Even, full-screen, continuous slow rain ---------- */
+  const MAX_ACTIVE = 18;          // cap on-screen
+  const SPAWN_MS   = 950;         // interval (bigger = fewer)
+  const DUR_RANGE  = [14, 22];    // fall time (slow)
+  let applauseCount = 0;
+  const applauseCountEl = document.getElementById('applauseCount');
 
-    /* ===== Minimal, slow, full-width emoji rain with cute interactions ===== */
-    const PACK = ["👏","👋","🤝","🙏","🫶"]; // professional + warm
+  // full-width lanes with round-robin emission (no clumping)
+  let laneIdx = 0;
+  function lanes(){
+    const n = Math.max(10, Math.floor(window.innerWidth / 110)); // ≈110px per lane
+    const pad = 1.5;                       // vw left/right padding
+    const step = (100 - pad*2) / (n - 1);  // vw between lanes
+    return {n,pad,step};
+  }
+  function rand(min,max){ return Math.random()*(max-min)+min; }
 
-    const MAX_ACTIVE = 16;      // cap to avoid clutter
-    let   FLOW_MS    = 1200;    // spawn interval (bigger = fewer)
-    const DUR_RANGE  = [14, 22]; // fall duration (seconds)
+  function sparkleAt(x, y, txt="✨", cls="sparkle"){
+    const s = document.createElement('div'); s.className=cls; s.textContent=txt;
+    s.style.left = x+"px"; s.style.top = y+"px"; s.style.fontSize = (cls==="plus"?"16px":(18+Math.random()*6)+"px");
+    document.body.appendChild(s); setTimeout(()=>s.remove(), 900);
+  }
 
-    const applauseCountEl = document.getElementById('applauseCount');
-    let applauseCount = 0;
+  function makeEmoji(xvw=null, yStart=-60){
+    if (document.querySelectorAll('.emoji').length >= MAX_ACTIVE) return;
+    const {n,pad,step} = lanes();
+    if (xvw==null){ xvw = pad + (laneIdx*step) + rand(-step*0.18, step*0.18); laneIdx = (laneIdx+1)%n; }
 
-    function rand(min,max){ return Math.random()*(max-min)+min; }
+    const wrap = document.createElement('div'); wrap.className='emoji';
+    const span = document.createElement('span'); span.className='inner';
+    const ch = PACK[Math.floor(Math.random()*PACK.length)]; span.textContent = ch;
 
-    // Columns to spread across the screen
-    let colIndex = 0;
-    function columns(){
-      const n = Math.max(8, Math.floor(window.innerWidth / 120)); // ~120px per column
-      const pad = 2; // vw
-      const step = (100 - pad*2) / (n - 1);
-      return { n, pad, step };
-    }
+    const dur = rand(DUR_RANGE[0], DUR_RANGE[1]);
+    const delay = rand(0,0.8);
+    const size = rand(26,42);
+    const sway = (Math.random()<.5?-1:1) * rand(12,28);
+    const rot = (Math.random()<.5?-1:1) * rand(5,16) + "deg";
 
-    function sparkleAt(x, y, txt="✨", cls="sparkle"){
-      const s = document.createElement('div');
-      s.className = cls;
-      s.textContent = txt;
-      s.style.left = x + "px";
-      s.style.top  = y + "px";
-      s.style.fontSize = (cls==="plus"? "16px" : (18 + Math.random()*6) + "px");
-      document.body.appendChild(s);
-      setTimeout(()=>s.remove(), 900);
-    }
+    wrap.style.left=xvw+"vw"; wrap.style.top=yStart+"px";
+    wrap.style.animation = `fall ${dur}s linear ${delay}s forwards`;
+    span.style.fontSize=size+"px"; span.style.setProperty('--sx',sway+"px"); span.style.setProperty('--rot',rot);
 
-    function makeEmoji(xvw=null, yStart=-60){
-      if (document.querySelectorAll('.emoji').length >= MAX_ACTIVE) return;
-
-      const { n, pad, step } = columns();
-      if (xvw == null){
-        xvw = pad + (colIndex * step) + rand(-step*0.2, step*0.2);
-        colIndex = (colIndex + 1) % n;
-      }
-
-      const wrap = document.createElement('div');
-      wrap.className = 'emoji';
-      const span = document.createElement('span');
-      span.className = 'inner';
-      const ch = PACK[Math.floor(Math.random()*PACK.length)];
-      span.textContent = ch;
-
-      const baseDur = rand(DUR_RANGE[0], DUR_RANGE[1]);
-      const delay = rand(0, 0.8);
-      const size = rand(26, 42);
-      const sway = (Math.random()<.5?-1:1) * rand(12, 28);
-      const rot  = (Math.random()<.5?-1:1) * rand(5, 16) + "deg";
-
-      wrap.style.left = xvw + "vw";
-      wrap.style.top = yStart + "px";
-      wrap.style.animation = `fall ${baseDur}s linear ${delay}s forwards`;
-      span.style.fontSize = size + "px";
-      span.style.setProperty('--sx', sway + "px");
-      span.style.setProperty('--rot', rot);
-
-      // Click reactions per emoji type
-      wrap.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const r = span.getBoundingClientRect();
-        if (ch === "👏"){
-          // clap animation + count + sparkles
-          span.style.animation = "clapPulse .5s ease-in-out 3";
-          applauseCount++;
-          applauseCountEl.textContent = applauseCount;
-          sparkleAt(r.left + r.width/2, r.top, "+1", "plus");
-          for(let i=0;i<2;i++) sparkleAt(r.left + rand(0,r.width), r.top + rand(0,r.height));
-          setTimeout(()=>wrap.remove(), 400);
-        } else if (ch === "👋"){
-          span.style.animation = "wave .6s ease-in-out 2";
-          sparkleAt(r.left + r.width/2, r.top, "👋", "plus");
-          setTimeout(()=>wrap.remove(), 420);
-        } else if (ch === "🤝"){
-          span.style.animation = "handshake .5s ease-in-out 2";
-          sparkleAt(r.left + r.width/2, r.top, "🤝", "plus");
-          setTimeout(()=>wrap.remove(), 420);
-        } else if (ch === "🫶"){
-          span.style.animation = "heartPop .5s ease-in-out 2";
-          sparkleAt(r.left + r.width/2, r.top, "🫶", "plus");
-          setTimeout(()=>wrap.remove(), 420);
-        } else if (ch === "🙏"){
-          span.style.animation = "heartPop .5s ease-in-out 1";
-          sparkleAt(r.left + r.width/2, r.top, "🙏", "plus");
-          setTimeout(()=>wrap.remove(), 420);
-        }
-      });
-
-      wrap.appendChild(span);
-      document.body.appendChild(wrap);
-      setTimeout(()=>wrap.remove(), (baseDur+delay+0.6)*1000);
-    }
-
-    // Continuous emitter
-    let emitterId = null;
-    function startEmitter(){ stopEmitter(); emitterId = setInterval(()=> makeEmoji(null), FLOW_MS); }
-    function stopEmitter(){ if(emitterId){ clearInterval(emitterId); emitterId = null; } }
-
-    // Applause burst
-    function burst(count=8){
-      const mid = (window.innerWidth / 2);
-      for(let i=0;i<count;i++){
-        const xpx = mid + rand(-220, 220);
-        const xvw = (xpx / window.innerWidth) * 100;
-        setTimeout(()=> makeEmoji(xvw, -60 - i*6), i*60);
-      }
-      // bump counter a little (fun)
-      applauseCount += Math.ceil(count/3);
-      applauseCountEl.textContent = applauseCount;
-    }
-
-    window.addEventListener('load', ()=>{
-      startEmitter();
-      setTimeout(()=> burst(10), 400); // gentle welcome burst
-    });
-    document.getElementById('applause').addEventListener('click', ()=> burst(12));
-
-    // Background click → tiny sparkles (no extra emojis)
-    document.body.addEventListener('click', (e) => {
-      if(e.target.closest('.modal') || e.target.closest('.card')) return;
-      sparkleAt(e.clientX, e.clientY);
+    // per-emoji micro-interaction
+    wrap.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const r = span.getBoundingClientRect();
+      if (ch==="👏"){ span.style.animation="clapPulse .5s ease-in-out 3"; applauseCount++; applauseCountEl.textContent=applauseCount; sparkleAt(r.left+r.width/2, r.top, "+1", "plus"); setTimeout(()=>wrap.remove(), 420); }
+      else if (ch==="👋"){ span.style.animation="wave .6s ease-in-out 2"; sparkleAt(r.left+r.width/2, r.top, "👋", "plus"); setTimeout(()=>wrap.remove(), 420); }
+      else if (ch==="🤝"){ span.style.animation="handshake .5s ease-in-out 2"; sparkleAt(r.left+r.width/2, r.top, "🤝", "plus"); setTimeout(()=>wrap.remove(), 420); }
+      else if (ch==="🫶" || ch==="🙏"){ span.style.animation="heartPop .6s ease-in-out 2"; sparkleAt(r.left+r.width/2, r.top, ch, "plus"); setTimeout(()=>wrap.remove(), 420); }
+      else { sparkleAt(r.left+r.width/2, r.top); }
     });
 
-    // Reduced motion
-    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-      stopEmitter();
+    wrap.appendChild(span); document.body.appendChild(wrap);
+    setTimeout(()=>wrap.remove(), (dur+delay+0.6)*1000);
+  }
+
+  let emitter = setInterval(()=> makeEmoji(null), SPAWN_MS);
+  window.addEventListener('resize', ()=>{ /* lanes auto-recalc on next spawn */ });
+
+  // applause burst
+  function burst(count=10){
+    const mid = window.innerWidth/2;
+    for(let i=0;i<count;i++){
+      const xpx = mid + rand(-240,240); const xvw = (xpx/window.innerWidth)*100;
+      setTimeout(()=> makeEmoji(xvw, -60 - i*6), i*55);
     }
+    applauseCount += Math.ceil(count/3); applauseCountEl.textContent = applauseCount;
+  }
+  document.getElementById('applause').addEventListener('click', ()=> burst(12));
 
-    /* ===== Google Form direct submit (no email) ===== */
-    const GF_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/formResponse";
-    const GF_FEEDBACK_FIELD = "entry.1175385091";
+  // ship it rocket + terminal sign-off
+  document.getElementById('ship').addEventListener('click', ()=>{
+    const r = document.createElement('div'); r.className='rocket'; r.textContent='🚀';
+    document.body.appendChild(r); setTimeout(()=>r.remove(), 3000);
+    runSignoff();
+  });
 
-    const modal = document.getElementById('modal');
-    const feedbackBtn = document.getElementById('feedbackBtn');
-    const cancelBtn = document.getElementById('cancel');
-    const sendBtn = document.getElementById('send');
-    const fbText = document.getElementById('fbText');
+  const term = document.getElementById('term');
+  function runSignoff(){
+    term.textContent = "";
+    const lines = [
+      `$ git commit -m "Thank you, team — ${name}"`,
+      `✔ tests passed`,
+      `$ git push origin main`,
+      `deployment: done ✓`
+    ];
+    let i=0;
+    function typeLine(){
+      if(i>=lines.length) return;
+      let j=0, line=lines[i]; const span=document.createElement('span'); term.appendChild(span);
+      const timer = setInterval(()=>{ span.textContent = line.slice(0,++j); if(j>=line.length){ clearInterval(timer); span.insertAdjacentHTML('beforeend', (i===1||i===3)?' <span class="ok"></span>':''); i++; term.appendChild(document.createElement('br')); setTimeout(typeLine, 250); } }, 14);
+    }
+    typeLine();
+  }
 
-    feedbackBtn.addEventListener('click', () => { modal.classList.add('open'); fbText.focus(); });
-    cancelBtn.addEventListener('click', () => modal.classList.remove('open'));
-    sendBtn.addEventListener('click', () => {
-      const message = fbText.value.trim();
-      if (!message){ alert("Please write a quick note first."); return; }
+  // background click → little sparkle
+  document.body.addEventListener('click', (e)=>{
+    if(e.target.closest('.card') || e.target.closest('.modal')) return;
+    sparkleAt(e.clientX,e.clientY);
+  });
 
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = GF_ACTION;
-      form.target = 'gform-target';
+  // reduced motion safety
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    clearInterval(emitter);
+  }
 
-      const msgInput = document.createElement('textarea');
-      msgInput.name = GF_FEEDBACK_FIELD;
-      msgInput.value = `${message}\n\n— sent from: ${location.href}`;
-      form.appendChild(msgInput);
-
-      document.body.appendChild(form);
-      form.submit();
-      document.body.removeChild(form);
-
-      alert("Thanks! Your feedback was sent ✅");
-      modal.classList.remove('open');
-      fbText.value = "";
-    });
-  </script>
+  /* ---------- Google Form direct submit (no email) ---------- */
+  const GF_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/formResponse";
+  const GF_FEEDBACK_FIELD = "entry.1175385091";
+  const modal = document.getElementById('modal');
+  document.getElementById('feedbackBtn').addEventListener('click', ()=> modal.style.display='flex');
+  document.getElementById('cancel').addEventListener('click', ()=> modal.style.display='none');
+  document.getElementById('send').addEventListener('click', ()=>{
+    const v = document.getElementById('fbText').value.trim(); if(!v){ alert("Please write a quick note first."); return; }
+    const form = document.createElement('form'); form.method='POST'; form.action=GF_ACTION; form.target='gform-target';
+    const t = document.createElement('textarea'); t.name=GF_FEEDBACK_FIELD; t.value = `${v}\n\n— sent from: ${location.href}`; form.appendChild(t);
+    document.body.appendChild(form); form.submit(); document.body.removeChild(form);
+    alert("Thanks! Your feedback was sent ✅"); modal.style.display='none'; document.getElementById('fbText').value="";
+  });
+</script>
 </body>
 </html>
