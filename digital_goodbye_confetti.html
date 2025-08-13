@@ -7,7 +7,7 @@
   <style>
     :root{
       --bg1:#0f172a; --bg2:#1e293b;
-      --card:#0b1220cc; /* adjust transparency via last 2 hex digits (b3≈70%, cc≈80%) */
+      --card:#0b1220c0; /* adjust transparency via last 2 hex digits (b3≈70%, c0≈75%) */
       --text:#e2e8f0; --border:#1f2a44;
     }
     html,body{height:100%;margin:0}
@@ -47,27 +47,28 @@
     .modal-actions{ margin-top:12px; display:flex; gap:10px; justify-content:flex-end; }
 
     /* Emoji rain layer (behind card) */
-    .emoji { position:fixed; top:-60px; z-index:1; /* behind card */ }
+    .emoji { position:fixed; top:-60px; z-index:1; }
     .emoji .inner{
       display:block; filter: drop-shadow(0 3px 6px rgba(0,0,0,.35));
-      animation: sway 3.5s ease-in-out infinite;
+      animation: sway 3.6s ease-in-out infinite;
       transition: transform .15s ease;
     }
-    .emoji:hover .inner{ transform: scale(1.25) rotate(6deg); }
+    .emoji:hover .inner{ transform: scale(1.15) rotate(6deg); }
     @keyframes fall { to { transform: translateY(110vh); opacity:1; } }
     @keyframes sway { 0%{ transform: translateX(0) rotate(0deg); }
-                      50%{ transform: translateX(var(--sx, 26px)) rotate(var(--rot, 10deg)); }
+                      50%{ transform: translateX(var(--sx, 24px)) rotate(var(--rot, 10deg)); }
                       100%{ transform: translateX(0) rotate(0deg); } }
 
-    /* Controls */
-    .controls{
-      position: fixed; right:14px; bottom:14px; z-index:4;
-      background:#0b1220cc; border:1px solid #1f2a44; border-radius:14px; padding:10px 12px;
-      font-size:12px; display:flex; gap:10px; align-items:center; backdrop-filter: blur(8px);
+    /* Sparkles for click feedback */
+    .sparkle{
+      position: fixed; z-index:1; pointer-events:none;
+      animation: upfade .8s ease-out forwards;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,.35));
     }
-    .controls label{ opacity:.85; margin-right:4px; }
-    .controls input[type="range"]{ width:120px; }
-    .controls select{ background:#0b1220; color:var(--text); border:1px solid #334155; border-radius:8px; padding:4px 6px; }
+    @keyframes upfade{
+      0% { transform: translateY(0) scale(.9); opacity:0.9; }
+      100% { transform: translateY(-28px) scale(1.2); opacity:0; }
+    }
   </style>
 </head>
 <body>
@@ -76,23 +77,9 @@
     <p class="msg" id="message">It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!</p>
     <p class="meta" id="signature">— Irfana</p>
     <div class="row">
-      <button id="burst">🤝 Little burst</button>
+      <button id="applause">👏 Applause</button>
       <button id="feedbackBtn">💬 Leave feedback</button>
     </div>
-  </div>
-
-  <!-- Controls -->
-  <div class="controls" aria-label="Emoji rain controls">
-    <button id="toggle">⏸ Pause</button>
-    <label>Speed</label>
-    <input id="speed" type="range" min="0.5" max="1.5" step="0.1" value="0.8" />
-    <label>Flow</label>
-    <input id="flow" type="range" min="200" max="1500" step="50" value="900" />
-    <select id="pack">
-      <option value="professional" selected>Professional 👋🤝🙏</option>
-      <option value="warm">Warm 🫶🧡</option>
-      <option value="celebrate">Celebrate ✨🎈</option>
-    </select>
   </div>
 
   <!-- Feedback Modal -->
@@ -113,7 +100,7 @@
   <script>
     const qs = new URLSearchParams(location.search);
 
-    // Content
+    /* ===== Page content ===== */
     const title = qs.get('title') || "Thank you, team!";
     const msg   = qs.get('msg')   || "It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!";
     const name  = qs.get('name')  || "Irfana";
@@ -129,122 +116,120 @@
       document.body.style.backgroundPosition = 'center';
     }
 
-    /* ===================== Emoji rain ===================== */
-    const PACKS = {
-      professional: ["👋","🤝","🙏","👏","🫶","💼","📈","🧑‍💻","🧑‍💼","🕊️","✨"],
-      warm:         ["🫶","🧡","💐","🌼","🤗","🙏","👋","💌","😊","✨"],
-      celebrate:    ["🎈","✨","🌟","🎉","🥳","👋","🤝","💐"]
-    };
-    let currentPack = "professional";
+    /* ===== Minimal, slow, full-width emoji rain ===== */
+    // Small, professional set
+    const PACK = ["👏","👋","🤝","🙏","🫶"];
 
-    const speedSlider = document.getElementById('speed'); // lower = slower
-    const flowSlider  = document.getElementById('flow');  // bigger = fewer / slower stream
-    const packSelect  = document.getElementById('pack');
-    const toggleBtn   = document.getElementById('toggle');
-    const burstBtn    = document.getElementById('burst');
+    // Tweak these to control clutter & speed
+    const MAX_ACTIVE = 18;      // max emojis on screen at once
+    let   FLOW_MS    = 1100;    // time between new emojis (bigger = fewer)
+    const DUR_RANGE  = [14, 22]; // fall duration in seconds (slow)
 
-    let running = true;
-    let emitterId = null;
-
-    function rand(min,max){ return Math.random()*(max-min)+min; }
-
-    // Column-based emitter to guarantee full-width spread
     let colIndex = 0;
     function columns(){
-      const n = Math.max(8, Math.floor(window.innerWidth / 110)); // ~110px per column
-      const pad = 2; // vw edge padding
+      const n = Math.max(8, Math.floor(window.innerWidth / 120)); // ~120px per column
+      const pad = 2; // vw padding at edges
       const step = (100 - pad*2) / (n - 1);
       return { n, pad, step };
     }
 
+    function rand(min,max){ return Math.random()*(max-min)+min; }
+
+    function sparkleAt(x, y){
+      for(let i=0;i<3;i++){
+        const s = document.createElement('div');
+        s.className = 'sparkle';
+        s.textContent = "✨";
+        s.style.left = (x + rand(-12,12)) + "px";
+        s.style.top  = (y + rand(-6,6)) + "px";
+        s.style.fontSize = (18 + Math.random()*6) + "px";
+        document.body.appendChild(s);
+        setTimeout(()=>s.remove(), 900);
+      }
+    }
+
     function makeEmoji(xvw=null, yStart=-60){
+      // Respect cap
+      if (document.querySelectorAll('.emoji').length >= MAX_ACTIVE) return;
+
       const { n, pad, step } = columns();
-      // If no x specified, advance across columns with slight jitter (spreads across whole screen)
       if (xvw == null){
-        xvw = pad + (colIndex * step) + rand(-step*0.25, step*0.25);
-        colIndex = (colIndex + 1) % n;
+        xvw = pad + (colIndex * step) + rand(-step*0.2, step*0.2);
+        colIndex = (colIndex + 1) % n; // sweep across columns
       }
 
       const wrap = document.createElement('div');
       wrap.className = 'emoji';
       const span = document.createElement('span');
       span.className = 'inner';
-      const pack = PACKS[currentPack];
-      span.textContent = pack[Math.floor(Math.random()*pack.length)];
+      span.textContent = PACK[Math.floor(Math.random()*PACK.length)];
 
-      const baseDur = rand(12,20);                   // slow fall 12–20s
-      const speedFactor = parseFloat(speedSlider.value); // 0.5–1.5
-      const dur = baseDur / speedFactor;
-      const delay = rand(0, 1.2);
-      const size = rand(24, 46);                     // px
-      const sway = (Math.random()<.5?-1:1) * rand(14, 32);
-      const rot  = (Math.random()<.5?-1:1) * rand(5, 18) + "deg";
+      const baseDur = rand(DUR_RANGE[0], DUR_RANGE[1]);
+      const delay = rand(0, 0.8);
+      const size = rand(26, 42);                 // px
+      const sway = (Math.random()<.5?-1:1) * rand(12, 28);
+      const rot  = (Math.random()<.5?-1:1) * rand(5, 16) + "deg";
 
       wrap.style.left = xvw + "vw";
       wrap.style.top = yStart + "px";
-      wrap.style.animation = `fall ${dur}s linear ${delay}s forwards`;
+      wrap.style.animation = `fall ${baseDur}s linear ${delay}s forwards`;
       span.style.fontSize = size + "px";
       span.style.setProperty('--sx', sway + "px");
       span.style.setProperty('--rot', rot);
 
-      // interactions
-      wrap.addEventListener('mouseenter', () => span.style.transform = "scale(1.2) rotate(6deg)");
-      wrap.addEventListener('mouseleave', () => span.style.transform = "");
+      // Interactions
       wrap.addEventListener('click', (e) => {
         e.stopPropagation();
-        span.style.transform = "scale(1.5) rotate(-8deg)";
-        setTimeout(()=>wrap.remove(), 150);
-        burst(Math.max(2, Math.min(98, xvw)), 10);
+        const rect = span.getBoundingClientRect();
+        sparkleAt(rect.left + rect.width/2, rect.top + rect.height/2);
+        span.style.transform = "scale(1.4) rotate(-6deg)";
+        setTimeout(()=>wrap.remove(), 120);
       });
 
       wrap.appendChild(span);
       document.body.appendChild(wrap);
-      setTimeout(()=>wrap.remove(), (dur+delay+0.5)*1000);
+      setTimeout(()=>wrap.remove(), (baseDur+delay+0.6)*1000);
     }
 
+    // Continuous emitter
+    let emitterId = null;
     function startEmitter(){
       stopEmitter();
-      const interval = parseInt(flowSlider.value, 10); // ms
-      emitterId = setInterval(()=> makeEmoji(null), interval);
+      emitterId = setInterval(()=> makeEmoji(null), FLOW_MS);
     }
     function stopEmitter(){ if(emitterId){ clearInterval(emitterId); emitterId = null; } }
 
-    function burst(xvw=50, count=12){
+    // Small applause burst
+    function burst(count=8){
+      const mid = (window.innerWidth / 2);
       for(let i=0;i<count;i++){
-        setTimeout(()=> makeEmoji(xvw + rand(-8,8), -60 - i*8), i*50);
+        const xpx = mid + rand(-220, 220);
+        const xvw = (xpx / window.innerWidth) * 100;
+        setTimeout(()=> makeEmoji(xvw, -60 - i*6), i*60);
       }
     }
-
-    // Background click → friendly burst
-    document.body.addEventListener('click', (e) => {
-      if(e.target.closest('.controls') || e.target.closest('.modal') || e.target.closest('.card')) return;
-      const xvw = (e.clientX / window.innerWidth) * 100;
-      burst(xvw);
-    });
-
-    // Controls
-    packSelect.addEventListener('change', ()=>{ currentPack = packSelect.value; });
-    speedSlider.addEventListener('input', ()=>{ /* affects new emojis only */ });
-    flowSlider.addEventListener('input', startEmitter);
-    toggleBtn.addEventListener('click', ()=>{
-      running = !running;
-      if(running){ startEmitter(); toggleBtn.textContent = "⏸ Pause"; }
-      else { stopEmitter(); toggleBtn.textContent = "▶️ Play"; }
-    });
-    burstBtn.addEventListener('click', ()=> burst());
 
     // Start
     window.addEventListener('load', ()=>{
       startEmitter();
-      setTimeout(()=> burst(), 500); // gentle welcome burst
+      setTimeout(()=> burst(10), 400); // gentle welcome burst
+    });
+    document.getElementById('applause').addEventListener('click', ()=> burst(12));
+
+    // Background click → tiny sparkle (no extra emojis)
+    document.body.addEventListener('click', (e) => {
+      if(e.target.closest('.modal') || e.target.closest('.card')) return;
+      sparkleAt(e.clientX, e.clientY);
     });
 
-    // Respect reduced-motion
+    // Reduced motion
     if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
       stopEmitter();
     }
 
-    /* ================= Google Form direct submit (no email) ================= */
+    /* ===== Google Form direct submit (no email) ===== */
+    // From your prefill link:
+    // https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/viewform?usp=pp_url&entry.1175385091=...
     const GF_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/formResponse";
     const GF_FEEDBACK_FIELD = "entry.1175385091";
 
@@ -256,7 +241,6 @@
 
     feedbackBtn.addEventListener('click', () => { modal.classList.add('open'); fbText.focus(); });
     cancelBtn.addEventListener('click', () => modal.classList.remove('open'));
-
     sendBtn.addEventListener('click', () => {
       const message = fbText.value.trim();
       if (!message){ alert("Please write a quick note first."); return; }
