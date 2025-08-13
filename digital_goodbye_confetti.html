@@ -3,284 +3,238 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>👋 A Little Goodbye — Interactive</title>
+<title>Thank you</title>
 <style>
-:root{
-  --bg1:#0f172a; --bg2:#1e293b;
-  --card:#0b1220c0; --text:#e2e8f0; --border:#1f2a44;
-  --accent:#f59e0b; --ok:#22c55e; --laser:#22d3ee;
-}
-html,body{height:100%;margin:0}
-body{
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial;
-  color:var(--text);
-  display:grid; place-items:center;
-  background: radial-gradient(1200px 800px at 10% 10%, var(--bg2), var(--bg1));
-  background-size: cover; background-position: center; background-attachment: fixed;
-  overflow-x:hidden;
-}
-.card{
-  position:relative; z-index:5; max-width:720px; width:min(92vw,720px);
-  backdrop-filter: blur(12px);
-  background: var(--card);
-  border:1px solid var(--border); border-radius:20px;
-  padding:28px 28px 20px;
-  box-shadow:0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
-}
-h1{ font-size: clamp(28px,5vw,44px); margin:8px 0 10px; line-height:1.1; }
-.msg{ font-size: clamp(16px,2.6vw,20px); opacity:.92; margin:0 0 14px; }
-.meta{ opacity:.8; font-size:14px; margin-top:6px; }
-.row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
-button{
-  appearance:none; border:1px solid #334155; background:#0b1220; color:var(--text);
-  padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600;
-  transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease;
-}
-button:hover{ border-color:#475569; box-shadow:0 8px 20px rgba(0,0,0,.25); transform:translateY(-1px); }
+  :root{
+    --bg1:#0f172a; --bg2:#0b1220;        /* page background (behind your photo) */
+    --card:#0b1220cc;                    /* message card with ~80% opacity */
+    --text:#e6eef7; --muted:#9fb0c3;     /* copy colors */
+    --border:#1f2a44; --accent:#30c48d;  /* subtle accent */
+  }
+  * { box-sizing:border-box }
+  html,body{ height:100%; margin:0 }
+  body{
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial;
+    color:var(--text);
+    display:grid; place-items:center;
+    background: radial-gradient(1200px 800px at 10% 10%, var(--bg1), var(--bg2));
+    background-size:cover; background-position:center; background-attachment:fixed;
+    overflow:hidden;
+  }
 
-/* ===== Toolbelt ===== */
-.toolbelt{
-  position:fixed; right:14px; bottom:14px; z-index:6;
-  background:#0b1220cc; border:1px solid var(--border); border-radius:14px; padding:10px 12px;
-  display:flex; flex-wrap:wrap; gap:8px; align-items:center; backdrop-filter: blur(8px);
-  font-size:12px;
-}
-.toolbelt .seg{ display:flex; gap:8px; align-items:center; }
-.toolbelt .k{ opacity:.85; }
+  /* Center card */
+  .card{
+    position:relative; z-index:3;
+    width:min(92vw, 720px);
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:32px 28px 24px;
+    box-shadow:0 24px 60px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.06);
+    backdrop-filter: blur(10px);
+  }
+  h1{ margin:0 0 10px; font-size:clamp(26px,4.8vw,42px); line-height:1.1; letter-spacing:.2px }
+  .msg{ margin:0 0 14px; font-size:clamp(15px,2.4vw,18px); color:var(--text); opacity:.95 }
+  .meta{ margin-top:6px; color:var(--muted); font-size:14px }
 
-/* ===== Blueprint ===== */
-.blueprint::before{
-  content:""; position:fixed; inset:0; z-index:2; pointer-events:none;
-  background:
-    repeating-linear-gradient(0deg, rgba(0,255,255,.07) 0 1px, transparent 1px 24px),
-    repeating-linear-gradient(90deg, rgba(0,255,255,.07) 0 1px, transparent 1px 24px);
-}
-.blueprint{
-  filter: hue-rotate(170deg) saturate(1.1);
-}
+  .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:18px }
+  button, a.btn{
+    appearance:none; border:1px solid #2b3b52; background:#0b1220; color:var(--text);
+    padding:10px 14px; border-radius:12px; font-weight:600; cursor:pointer; text-decoration:none;
+    transition: border-color .15s ease, box-shadow .25s ease, transform .06s ease;
+  }
+  button:hover, a.btn:hover{ border-color:#3a4c66; box-shadow:0 8px 22px rgba(0,0,0,.28); transform:translateY(-1px) }
+  .primary{ background:linear-gradient(180deg, #0f172a 0, #0c1425 100%); border-color:#2b3b52 }
+  .accent{ border-color:#2e5a4c; background:linear-gradient(180deg, #0f1f1a 0, #0c1714 100%) }
+  .accent:hover{ border-color:#2f8568 }
 
-/* ===== Laser level ===== */
-#laser{ position:fixed; left:0; width:100vw; height:2px; background:var(--laser);
-  box-shadow:0 0 10px rgba(34,211,238,.8); z-index:4; display:none; }
+  /* Minimal “drift” layer (evenly spread, very sparse) */
+  .g{ position:fixed; inset:0; z-index:1; pointer-events:none; }
+  .p{
+    position:absolute; top:-60px; color:#fff; opacity:.35;
+    text-shadow:0 2px 8px rgba(0,0,0,.35);
+    animation: fall var(--dur,s) linear var(--delay,s) forwards,
+               sway 9s ease-in-out infinite;
+    will-change: transform;
+  }
+  @keyframes fall { to { transform:translateY(110vh) } }
+  @keyframes sway { 0%{ transform:translateX(0) rotate(0) }
+                    50%{ transform:translateX(var(--sx,26px)) rotate(var(--rot,8deg)) }
+                    100%{ transform:translateX(0) rotate(0) } }
 
-/* ===== Measure tool ===== */
-.measure-line{ position:fixed; z-index:4; border-top:2px dashed #94a3b8; }
-.measure-badge{
-  position:fixed; z-index:4; background:#0b1220; border:1px solid #475569; border-radius:10px;
-  padding:4px 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px;
-}
+  /* Top-right controls (tiny) */
+  .ctrl{
+    position:fixed; right:14px; top:14px; z-index:4; display:flex; gap:8px; align-items:center;
+    background:#0b1220cc; border:1px solid var(--border); border-radius:12px; padding:6px 10px;
+    font-size:12px; backdrop-filter:blur(8px)
+  }
+  .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); margin-right:6px }
+  .badge{ display:inline-flex; align-items:center; gap:8px; font-weight:600; }
 
-/* ===== Markers ===== */
-.marker{ position:fixed; z-index:3; transform:translate(-50%,-100%); filter: drop-shadow(0 3px 6px rgba(0,0,0,.35)); }
-
-/* ===== Crane & beam ===== */
-#craneHook{ position:fixed; top:6vh; left:20vw; z-index:4; cursor:grab; user-select:none; font-size:34px; }
-#craneHook.drag{ cursor:grabbing; }
-.beam{
-  position:fixed; z-index:3; left:0; top:0;
-  width:220px; height:26px; line-height:26px; text-align:center;
-  background:#1f2937; color:#ffe08a; border:2px solid #374151; border-radius:4px;
-  box-shadow:0 6px 16px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
-  font-weight:700; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI;
-}
-
-/* ===== Emoji rain ===== */
-.emoji { position:fixed; top:-60px; z-index:1; }
-.emoji .inner{
-  display:block; filter: drop-shadow(0 3px 6px rgba(0,0,0,.35));
-  animation: sway 3.8s ease-in-out infinite;
-}
-@keyframes fall { to { transform: translateY(110vh); } }
-@keyframes sway { 0%{ transform: translateX(0) rotate(0deg); }
-                  50%{ transform: translateX(var(--sx, 24px)) rotate(var(--rot, 8deg)); }
-                  100%{ transform: translateX(0) rotate(0deg); } }
-
-/* Click feedback */
-.sparkle{ position: fixed; z-index:4; pointer-events:none; color:#ffe08a; animation: upfade .8s ease-out forwards; }
-.plus{ position: fixed; z-index:4; pointer-events:none; color:var(--accent); font-weight:700; animation: upfade .9s ease-out forwards; }
-@keyframes upfade{ 0%{ transform: translateY(0) scale(.9); opacity:.95; } 100%{ transform: translateY(-28px) scale(1.15); opacity:0; } }
-
-/* Applause */
-.applause{ position: fixed; left:14px; bottom:14px; z-index:6; background:#0b1220cc; border:1px solid var(--border);
-  border-radius:999px; padding:8px 12px; display:flex; gap:8px; align-items:center; backdrop-filter:blur(8px); font-weight:700; }
-.applause .dot{ width:10px; height:10px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 4px rgba(245,158,11,.15); }
-
-/* Modal (feedback) */
-.modal{ position:fixed; inset:0; display:none; z-index:10; align-items:center; justify-content:center; background:rgba(0,0,0,.45); padding:18px; }
-.modal-card{ width:min(92vw,620px); background:#0b1220; border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:0 24px 60px rgba(0,0,0,.5); }
-
+  /* Respect “reduce motion” */
+  @media (prefers-reduced-motion: reduce){
+    .p{ animation:none }
+  }
 </style>
 </head>
 <body>
-  <div id="laser"></div>
+  <!-- Tiny controls -->
+  <div class="ctrl">
+    <span class="badge"><span class="dot"></span>Interactive</span>
+    <label style="display:flex; gap:6px; align-items:center">
+      <input id="toggleAnim" type="checkbox" checked />
+      <span>Animation</span>
+    </label>
+  </div>
+
+  <!-- Gentle background drift -->
+  <div class="g" id="drift"></div>
+
+  <!-- Message -->
   <div class="card">
     <h1 id="title">Thank you, team!</h1>
-    <p class="msg" id="message">It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!</p>
+    <p class="msg" id="message">
+      It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead.
+    </p>
     <p class="meta" id="signature">— Irfana</p>
+
     <div class="row">
-      <button id="applauseBtn">👏 Applause</button>
-      <button id="feedbackBtn">💬 Leave feedback</button>
+      <button id="applause" class="primary">👏 Applause <span id="count" style="opacity:.8;margin-left:6px">0</span></button>
+      <button id="feedbackBtn" class="accent">💬 Leave feedback</button>
+      <a id="connect" class="btn" href="#" target="_blank" rel="noopener">🔗 Connect</a>
     </div>
   </div>
 
-  <!-- Toolbelt -->
-  <div class="toolbelt" role="toolbar" aria-label="Tools">
-    <div class="seg">
-      <button id="bp">📐 Blueprint</button>
-      <button id="laserBtn">🟢 Laser</button>
-      <button id="measureBtn">📏 Measure</button>
-    </div>
-    <div class="seg">
-      <span class="k">—</span>
-      <button id="markerBtn">🚧 Mark</button>
-      <button id="dropBtn">🏗️ Drop beam</button>
-    </div>
-  </div>
-
-  <!-- Crane hook -->
-  <div id="craneHook" title="Drag the hook">🪝</div>
-
-  <!-- Applause counter -->
-  <div class="applause" id="applauseBadge"><div class="dot"></div><span>Applause:</span><span id="applauseCount">0</span></div>
-
-  <!-- Feedback Modal -->
-  <div class="modal" id="modal">
-    <div class="modal-card">
-      <h2>💬 Share your feedback</h2>
-      <textarea id="fbText" placeholder="Write a quick note..." style="width:100%;min-height:140px;background:#0f172a;color:var(--text);border:1px solid #334155;border-radius:12px;padding:10px;font-family:inherit;font-size:14px;"></textarea>
-      <div class="row" style="margin-top:12px;justify-content:flex-end">
+  <!-- Feedback modal (simple) -->
+  <div id="modal"
+       style="position:fixed;inset:0;display:none;z-index:10;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:18px">
+    <div style="width:min(92vw,620px);background:#0b1220;border:1px solid #1f2a44;border-radius:16px;padding:18px;
+                box-shadow:0 24px 60px rgba(0,0,0,.5)">
+      <h3 style="margin:0 0 10px">Share your feedback</h3>
+      <textarea id="fbText" placeholder="Write a quick note..."
+        style="width:100%;min-height:140px;background:#0f172a;color:var(--text);
+               border:1px solid #334155;border-radius:12px;padding:10px;font:inherit"></textarea>
+      <div class="row" style="justify-content:flex-end;margin-top:12px">
         <button id="cancel">Cancel</button>
-        <button id="send">Send</button>
+        <button id="send" class="primary">Send</button>
       </div>
     </div>
   </div>
 
-  <!-- Hidden iframe for Google Form -->
+  <!-- Hidden target for Google Form -->
   <iframe name="gform-target" style="display:none"></iframe>
 
 <script>
-/* ===== Params & basic text ===== */
-const qs = new URLSearchParams(location.search);
-const title = qs.get('title') || "Thank you, team!";
-const msg   = qs.get('msg')   || "It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!";
-const name  = qs.get('name')  || "Irfana";
-const bg    = qs.get('bg')    || "1.jpeg";
-document.getElementById('title').textContent = title;
-document.getElementById('message').textContent = msg;
-document.getElementById('signature').textContent = `— ${name}`;
-if (bg){ const url = bg.match(/^https?:\/\//)?bg:`${bg}`; document.body.style.backgroundImage = `url('${url}')`; }
+  /* ---------- Text & links from URL ---------- */
+  const qs = new URLSearchParams(location.search);
+  const title = qs.get('title') || "Thank you, team!";
+  const msg   = qs.get('msg')   || "It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead.";
+  const name  = qs.get('name')  || "Irfana";
+  const bg    = qs.get('bg')    || "1.jpeg";  // put your image in the repo and pass ?bg=1.jpeg
+  const link  = qs.get('link')  || "https://www.linkedin.com/"; // connect button
 
-/* ===== Helpers ===== */
-function rand(min,max){ return Math.random()*(max-min)+min; }
-function sparkleAt(x,y,txt="✨",cls="sparkle"){
-  const s=document.createElement('div'); s.className=cls; s.textContent=txt;
-  s.style.left=x+"px"; s.style.top=y+"px"; s.style.fontSize=(cls==="plus"?"16px":(18+Math.random()*6)+"px");
-  document.body.appendChild(s); setTimeout(()=>s.remove(),900);
-}
+  document.getElementById('title').textContent = title;
+  document.getElementById('message').textContent = msg;
+  document.getElementById('signature').textContent = `— ${name}`;
+  document.getElementById('connect').href = link;
 
-/* ===== Emoji rain (construction pack) ===== */
-const PACK = ["👷‍♀️","🏗️","🚧","🧱","🔧","👋","🤝","👏"];
-const MAX_ACTIVE=14, SPAWN_MS=1000, DUR_RANGE=[14,22];
-let lane=0;
-function lanes(){ const n=Math.max(11,Math.floor(innerWidth/110)), pad=1.5, step=(100-pad*2)/(n-1); return {n,pad,step}; }
-function makeEmoji(xvw=null, y=-60){
-  if(document.querySelectorAll('.emoji').length>=MAX_ACTIVE) return;
-  const {n,pad,step}=lanes();
-  if(xvw==null){ xvw = pad + lane*step + rand(-step*.2, step*.2); lane=(lane+1)%n; }
-  const wrap=document.createElement('div'); wrap.className='emoji';
-  const span=document.createElement('span'); span.className='inner'; span.textContent=PACK[Math.floor(Math.random()*PACK.length)];
-  const dur=rand(DUR_RANGE[0],DUR_RANGE[1]), delay=rand(0,.8), size=rand(24,42), sway=(Math.random()<.5?-1:1)*rand(12,28), rot=(Math.random()<.5?-1:1)*rand(4,12)+"deg";
-  wrap.style.left=xvw+"vw"; wrap.style.top=y+"px"; wrap.style.animation=`fall ${dur}s linear ${delay}s forwards`;
-  span.style.fontSize=size+"px"; span.style.setProperty('--sx',sway+"px"); span.style.setProperty('--rot',rot);
-  wrap.addEventListener('click',e=>{ const r=span.getBoundingClientRect(); sparkleAt(r.left+r.width/2,r.top,"+1","plus"); setTimeout(()=>wrap.remove(),120); });
-  wrap.appendChild(span); document.body.appendChild(wrap);
-  setTimeout(()=>wrap.remove(),(dur+delay+.6)*1000);
-}
-let emitter=setInterval(()=>makeEmoji(null),SPAWN_MS);
-
-/* ===== Applause ===== */
-let applause=0; const countEl=document.getElementById('applauseCount');
-document.getElementById('applauseBtn').addEventListener('click',()=>{ applause+=3; countEl.textContent=applause; burst(10); });
-
-/* ===== Blueprint toggle ===== */
-document.getElementById('bp').addEventListener('click',()=> document.body.classList.toggle('blueprint'));
-
-/* ===== Laser level ===== */
-const laser=document.getElementById('laser'); let laserOn=false;
-document.getElementById('laserBtn').addEventListener('click',()=>{ laserOn=!laserOn; laser.style.display=laserOn?'block':'none'; });
-window.addEventListener('pointermove',e=>{ if(laserOn){ laser.style.top=e.clientY+'px'; } });
-
-/* ===== Measure tool ===== */
-let measuring=false, p1=null, line=null, badge=null;
-function clearMeasure(){ p1=null; line?.remove(); line=null; badge?.remove(); badge=null; }
-document.getElementById('measureBtn').addEventListener('click',()=>{ measuring=!measuring; clearMeasure(); });
-window.addEventListener('click',e=>{
-  if(!measuring || e.target.closest('.card') || e.target.closest('.toolbelt') || e.target.closest('.modal')) return;
-  if(!p1){ p1={x:e.clientX,y:e.clientY}; }
-  else{
-    const p2={x:e.clientX,y:e.clientY}, dx=p2.x-p1.x, dy=p2.y-p1.y, d=Math.hypot(dx,dy);
-    const est=(d*0.15).toFixed(1); // fun scale ~0.15m per px
-    line=document.createElement('div'); line.className='measure-line';
-    const angle=Math.atan2(dy,dx); line.style.left=p1.x+'px'; line.style.top=p1.y+'px'; line.style.width=d+'px'; line.style.transform=`rotate(${angle}rad)`; document.body.appendChild(line);
-    badge=document.createElement('div'); badge.className='measure-badge'; badge.textContent=`≈ ${est} m`;
-    badge.style.left=(p1.x+p2.x)/2+'px'; badge.style.top=(p1.y+p2.y)/2-24+'px'; document.body.appendChild(badge);
-    setTimeout(clearMeasure, 3500); p1=null;
+  if (bg){
+    const url = bg.match(/^https?:\/\//) ? bg : `${bg}`;
+    document.body.style.backgroundImage = `url('${url}'), radial-gradient(1200px 800px at 10% 10%, var(--bg1), var(--bg2))`;
+    document.body.style.backgroundSize   = 'cover, auto';
+    document.body.style.backgroundBlendMode = 'multiply';
   }
-});
 
-/* ===== Markers ===== */
-const MARK_SEQ=["🚧","📍","🧱"]; let markIdx=0; let markMode=false;
-document.getElementById('markerBtn').addEventListener('click',()=>{ markMode=!markMode; });
-window.addEventListener('click',e=>{
-  if(!markMode || e.target.closest('.card') || e.target.closest('.toolbelt') || e.target.closest('.modal')) return;
-  const m=document.createElement('div'); m.className='marker'; m.textContent=MARK_SEQ[markIdx]; markIdx=(markIdx+1)%MARK_SEQ.length;
-  m.style.left=e.clientX+'px'; m.style.top=e.clientY+'px'; document.body.appendChild(m);
-});
+  /* ---------- Minimal “drift” (even lanes, very sparse) ---------- */
+  const DRIFT = document.getElementById('drift');
+  const ICONS = ["👋","🤝","👏"];          // restrained set
+  const MAX   = 8;                        // max on screen
+  const INTERVAL = 1600;                  // spawn gap (ms)
+  const DUR_RANGE = [18, 26];             // slow fall
 
-/* ===== Crane hook drag + beam drop ===== */
-const hook=document.getElementById('craneHook'); let dragging=false, offX=0;
-hook.addEventListener('pointerdown',e=>{ dragging=true; hook.classList.add('drag'); offX=e.clientX - hook.getBoundingClientRect().left; hook.setPointerCapture(e.pointerId); });
-hook.addEventListener('pointermove',e=>{ if(!dragging) return; const x=Math.min(innerWidth-40, Math.max(10, e.clientX-offX)); hook.style.left=x+'px'; });
-hook.addEventListener('pointerup',()=>{ dragging=false; hook.classList.remove('drag'); });
+  let lane = 0, timer = null, animOn = true;
 
-document.getElementById('dropBtn').addEventListener('click',()=>{
-  const hb=hook.getBoundingClientRect();
-  const beam=document.createElement('div'); beam.className='beam'; beam.textContent='THANK YOU';
-  beam.style.left=(hb.left-90)+'px'; beam.style.top=(hb.bottom+8)+'px'; document.body.appendChild(beam);
-  // simple gravity
-  let y=hb.bottom+8, vy=1, ground=innerHeight-80;
-  const fall=()=>{ vy+=0.7; y+=vy; if(y>=ground){ y=ground; beam.style.top=y+'px'; sparkleAt(hb.left, y, "👏","plus"); burst(6); return; } beam.style.top=y+'px'; requestAnimationFrame(fall); };
-  fall();
-});
-
-/* ===== Burst helper ===== */
-function burst(count=8){
-  const mid=innerWidth/2;
-  for(let i=0;i<count;i++){
-    const xpx=mid+rand(-240,240), xvw=(xpx/innerWidth)*100;
-    setTimeout(()=>makeEmoji(xvw, -60 - i*6), i*55);
+  function lanes(){
+    const n = Math.max(8, Math.floor(window.innerWidth / 140)); // wider lanes for less clutter
+    const pad = 2;                                              // vw
+    const step = (100 - pad*2) / (n - 1);
+    return { n, pad, step };
   }
-}
 
-/* ===== Background sparkle ===== */
-window.addEventListener('click',e=>{
-  if(e.target.closest('.card') || e.target.closest('.toolbelt') || e.target.closest('.modal')) return;
-  sparkleAt(e.clientX,e.clientY);
-});
+  function spawn(){
+    if (!animOn) return;
+    if (DRIFT.childElementCount >= MAX) return;
 
-/* ===== Google Form feedback (direct submit) ===== */
-const GF_ACTION="https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/formResponse";
-const GF_FIELD="entry.1175385091";
-const modal=document.getElementById('modal');
-document.getElementById('feedbackBtn').addEventListener('click',()=> modal.style.display='flex');
-document.getElementById('cancel').addEventListener('click',()=> modal.style.display='none');
-document.getElementById('send').addEventListener('click',()=>{
-  const v=document.getElementById('fbText').value.trim(); if(!v){ alert("Please write a quick note first."); return; }
-  const form=document.createElement('form'); form.method='POST'; form.action=GF_ACTION; form.target='gform-target';
-  const t=document.createElement('textarea'); t.name=GF_FIELD; t.value=`${v}\n\n— sent from: ${location.href}`; form.appendChild(t);
-  document.body.appendChild(form); form.submit(); document.body.removeChild(form);
-  alert("Thanks! Your feedback was sent ✅"); modal.style.display='none'; document.getElementById('fbText').value="";
-});
+    const { n, pad, step } = lanes();
+    const xvw = pad + (lane * step);
+    lane = (lane + 1) % n;
+
+    const el = document.createElement('div');
+    el.className = 'p';
+    el.textContent = ICONS[Math.floor(Math.random()*ICONS.length)];
+    const dur = (Math.random()*(DUR_RANGE[1]-DUR_RANGE[0])+DUR_RANGE[0]).toFixed(1);
+    const delay = (Math.random()*0.8).toFixed(2);
+    el.style.left = `calc(${xvw}vw + ${(-step*0.35 + Math.random()*step*0.7).toFixed(2)}vw)`; // small jitter in lane
+    el.style.setProperty('--dur', dur+'s');
+    el.style.setProperty('--delay', delay+'s');
+    el.style.setProperty('--sx', (Math.random()<.5?-1:1)*Math.floor(16+Math.random()*18)+'px');
+    el.style.setProperty('--rot', (Math.random()<.5?-1:1)*(6+Math.random()*6)+'deg');
+    el.style.fontSize = (22 + Math.random()*8) + 'px';
+
+    DRIFT.appendChild(el);
+    setTimeout(()=> el.remove(), (parseFloat(dur)+parseFloat(delay)+0.5)*1000);
+  }
+
+  function start(){ if(!timer){ timer = setInterval(spawn, INTERVAL); } }
+  function stop(){ if(timer){ clearInterval(timer); timer=null; } }
+  start();
+
+  // Animation toggle & reduced motion
+  const toggle = document.getElementById('toggleAnim');
+  toggle.addEventListener('change', ()=>{ animOn = toggle.checked; animOn ? start() : stop(); });
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    toggle.checked = false; animOn = false; stop();
+  }
+
+  /* ---------- Applause (subtle) ---------- */
+  let count = 0;
+  const btn = document.getElementById('applause');
+  const num = document.getElementById('count');
+  btn.addEventListener('click', ()=>{
+    count++; num.textContent = count;
+    btn.style.transform = 'translateY(-1px) scale(1.02)';
+    setTimeout(()=> btn.style.transform = '', 120);
+  });
+
+  /* ---------- Feedback → Google Form (direct submit) ---------- */
+  const GF_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/formResponse";
+  const GF_FIELD  = "entry.1175385091";
+
+  const modal = document.getElementById('modal');
+  document.getElementById('feedbackBtn').addEventListener('click', ()=> modal.style.display = 'flex');
+  document.getElementById('cancel').addEventListener('click', ()=> modal.style.display = 'none');
+  document.getElementById('send').addEventListener('click', ()=>{
+    const v = document.getElementById('fbText').value.trim();
+    if(!v){ alert("Please write a quick note first."); return; }
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = GF_ACTION;
+    form.target = 'gform-target';
+
+    const t = document.createElement('textarea');
+    t.name = GF_FIELD;
+    t.value = `${v}\n\n— sent from: ${location.href}`;
+    form.appendChild(t);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+
+    alert("Thanks! Your feedback was sent ✅");
+    modal.style.display = 'none';
+    document.getElementById('fbText').value = "";
+  });
 </script>
 </body>
 </html>
