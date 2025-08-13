@@ -33,14 +33,7 @@
       box-shadow: 0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
       overflow:hidden;
     }
-    .badge{
-      position:absolute; inset: 0 auto auto 0;
-      transform: translate(-18px,-18px) rotate(-15deg);
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      color:#0b1220; font-weight:700; letter-spacing:.04em;
-      padding:6px 18px; border-radius:999px; font-size:12px;
-      box-shadow: 0 8px 20px rgba(56,189,248,.4);
-    }
+    /* .badge removed */
     h1{ font-size: clamp(28px, 5vw, 44px); margin:8px 0 10px; line-height:1.1; }
     .msg{ font-size: clamp(16px, 2.6vw, 20px); opacity:.92; margin:0 0 14px; }
     .meta{ opacity:.8; font-size:14px; margin-top:6px; }
@@ -52,7 +45,6 @@
     }
     button:hover, a.btn:hover{ border-color:#475569; box-shadow:0 8px 20px rgba(0,0,0,.25); transform:translateY(-1px); }
     .ghost{ background:transparent }
-    footer{ margin-top: 8px; font-size:12px; opacity:.6; }
 
     /* Feedback modal */
     .modal{
@@ -80,7 +72,7 @@
   <canvas id="confetti"></canvas>
 
   <div class="card">
-    <div class="badge">🎉 Celebration Mode</div>
+    <!-- removed: <div class="badge">🎉 Celebration Mode</div> -->
     <h1 id="title">Thank you, team!</h1>
     <p class="msg" id="message">
       It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!
@@ -115,26 +107,26 @@
     const title = qs.get('title') || "Thank you, team!";
     const msg   = qs.get('msg')   || "It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!";
     const name  = qs.get('name')  || "Irfana";
-    const email = qs.get('email') || "";              // for the "Stay in touch" button
-    const bg    = qs.get('bg')    || "1.jpeg";              // background image path or URL
-    const fbTo  = qs.get('fb_to') || email || "";     // who receives feedback (falls back to email)
+    const email = qs.get('email') || "";          // for the "Stay in touch" button
+    const bg    = qs.get('bg')    || "1.jpeg";    // default background image
+    const fbTo  = qs.get('fb_to') || email || ""; // feedback recipient
     const fbSub = qs.get('fb_sub')|| "Feedback for Irfana";
 
     document.getElementById('title').textContent = title;
     document.getElementById('message').textContent = msg;
     document.getElementById('signature').textContent = `— ${name}`;
 
-    // Background image if provided (?bg=yourimage.jpg or full URL)
-    if(bg){
+    // Background image
+    if (bg) {
       const url = bg.match(/^https?:\/\//) ? bg : `${bg}`;
-      document.body.style.backgroundImage = `url('${url}')`;
+      document.body.style.backgroundImage = `url('${url}')`;  // no overlay
       document.body.style.backgroundSize = 'cover';
       document.body.style.backgroundPosition = 'center';
     }
 
     // Mailto button
     const mailto = document.getElementById('mailto');
-    if(email){
+    if (email) {
       mailto.href = `mailto:${email}`;
     } else {
       mailto.style.display = 'none';
@@ -175,7 +167,3 @@
   </script>
 </body>
 </html>
-
-
-
-
