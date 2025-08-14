@@ -232,7 +232,7 @@
       const t = document.getElementById('toast');
       t.textContent = text;
       t.classList.add('show');
-      setTimeout(()=> t.classList.remove('show'), 2600);
+      setTimeout(()=> t.classList.remove('show'), 20000);
     }
 
     openMsg.addEventListener('click', ()=>{ modal.classList.add('open'); fbName.focus(); });
@@ -386,3 +386,4 @@
   </script>
 </body>
 </html>
+
