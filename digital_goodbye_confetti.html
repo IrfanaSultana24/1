@@ -144,7 +144,20 @@
   <div class="modal" id="modal">
     <div class="modal-card">
       <h2>💬 Send a message to Irfana</h2>
-      <textarea id="fbText" placeholder="Write a quick note..."></textarea>
+
+      <input type="text" id="fbName" placeholder="Enter your name" style="
+        width:100%;
+        margin-bottom:10px;
+        padding:10px;
+        border-radius:12px;
+        border:1px solid #334155;
+        background:#0f172a;
+        color:var(--text);
+        font-family:inherit;
+        font-size:14px;
+      ">
+
+      <textarea id="fbText" placeholder="Write your message..."></textarea>
       <div class="modal-actions">
         <button id="cancel" class="btn">Cancel</button>
         <button id="send" class="btn primary">Send</button>
@@ -198,13 +211,17 @@
     const cancel  = document.getElementById('cancel');
     const openMsg = document.getElementById('sendMsgBtn');
     const fbText  = document.getElementById('fbText');
+    const fbName  = document.getElementById('fbName');
 
-    openMsg.addEventListener('click', ()=>{ modal.classList.add('open'); fbText.focus(); });
+    openMsg.addEventListener('click', ()=>{ modal.classList.add('open'); fbName.focus(); });
     cancel .addEventListener('click', ()=> modal.classList.remove('open'));
 
     sendBtn.addEventListener('click', () => {
+      const nameVal = fbName.value.trim();
       const msg = fbText.value.trim();
-      if (!msg){ alert("Please write a quick note first 🙂"); return; }
+
+      if (!nameVal) { alert("Please enter your name 🙂"); return; }
+      if (!msg)     { alert("Please write your message 🙂"); return; }
 
       const form = document.createElement('form');
       form.method = 'POST';
@@ -213,7 +230,7 @@
 
       const t = document.createElement('textarea');
       t.name  = GF_FIELD;
-      t.value = `${msg}\n\n— sent from: ${location.href}`;
+      t.value = `Name: ${nameVal}\nMessage: ${msg}\n\n— sent from: ${location.href}`;
       form.appendChild(t);
 
       document.body.appendChild(form);
@@ -221,6 +238,7 @@
       document.body.removeChild(form);
 
       fbText.value = "";
+      fbName.value = "";
       modal.classList.remove('open');
       alert("Thanks! Your message was sent ✅");
     });
