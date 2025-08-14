@@ -4,12 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>🎉 A Little Goodbye</title>
+  <meta name="color-scheme" content="dark light">
   <style>
     :root{
       --bg1:#0f172a; --bg2:#1e293b;
-      --card:#0b1220cc; /* adjust transparency via last two hex digits */
-      --text:#e2e8f0; --border:#1f2a44;
-      --accent:#30c48d;
+      --card:#0b1220cc;            /* adjust transparency via the last two hex digits */
+      --text:#e2e8f0; --muted:#cbd5e1; --border:#1f2a44;
+      --accent:#30c48d; --accent-2:#22a3ff;
     }
     html,body{height:100%;margin:0}
     body{
@@ -21,46 +22,59 @@
       overflow-x:hidden;
     }
 
+    /* Main card */
     .card{
-      position:relative; z-index:2; max-width:720px; width:min(92vw,720px);
+      position:relative; z-index:2; max-width:760px; width:min(92vw,760px);
       backdrop-filter: blur(12px);
       background: var(--card);
       border:1px solid var(--border); border-radius:20px;
       padding:28px 28px 22px;
       box-shadow:0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
     }
-    h1{ font-size: clamp(28px,5vw,44px); margin:8px 0 10px; line-height:1.1; }
-    .msg{ font-size: clamp(16px,2.6vw,20px); opacity:.92; margin:0 0 14px; }
-    .meta{ opacity:.8; font-size:14px; margin-top:6px; }
+    h1{ font-size: clamp(28px,5vw,44px); margin:8px 0 14px; line-height:1.1; }
+    .msg p{ font-size: clamp(16px,2.6vw,20px); opacity:.95; margin:0 0 12px; line-height:1.6; }
+    .meta{ opacity:.8; font-size:14px; margin-top:10px; }
     .row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
-    button{
+
+    .btn{
       appearance:none; border:1px solid #334155; background:#0b1220; color:var(--text);
       padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600;
-      transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease;
+      transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+      text-decoration:none; display:inline-flex; align-items:center; gap:.5rem;
     }
-    button:hover{ border-color:#475569; box-shadow:0 8px 20px rgba(0,0,0,.25); transform:translateY(-1px); }
+    .btn:hover{ border-color:#475569; box-shadow:0 8px 20px rgba(0,0,0,.25); transform:translateY(-1px); }
+    .btn.primary{ background: linear-gradient(90deg, var(--accent), var(--accent-2)); color:#081018; border:0; }
+    .btn.primary:hover{ filter:brightness(1.05); }
 
-    /* HUD (game) */
-    .hud{
-      position:fixed; right:14px; top:14px; z-index:5; display:flex; gap:8px; align-items:center; flex-wrap:wrap;
-      background:#0b1220cc; border:1px solid var(--border); border-radius:12px; padding:8px 10px; backdrop-filter: blur(8px);
-      font-size:12px;
+    /* Get in touch popover */
+    .popover{
+      position:absolute; z-index:3; margin-top:8px; inset-inline-start:0;
+      background:#0b1220f2; border:1px solid var(--border); border-radius:14px;
+      padding:12px; box-shadow:0 16px 40px rgba(0,0,0,.45); backdrop-filter: blur(10px);
+      min-width:280px; display:none;
     }
-    .hud .pill{ padding:4px 8px; border:1px solid #2b3b52; border-radius:10px; background:#0e1728; }
-    .hud .best{ border-color:#2e5a4c; }
-    .hud .play{ border-color:#355281; }
+    .popover.open{ display:block; }
+    .contact-line{ display:flex; align-items:center; gap:.5rem; font-size:14px; color:var(--muted); }
+    .contact-line a{ color:#9bd3ff; text-decoration:none; }
+    .contact-line a:hover{ text-decoration:underline; }
 
-    /* Toast */
-    .toast{
-      position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:6;
-      background:#0b1220cc; border:1px solid var(--border); border-radius:12px; padding:10px 14px;
-      box-shadow:0 12px 30px rgba(0,0,0,.35); backdrop-filter: blur(8px); font-weight:600;
-      opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
+    /* Modal (send message) */
+    .modal{ position:fixed; inset:0; display:none; z-index:20; align-items:center; justify-content:center; background:rgba(0,0,0,.45); padding:18px; }
+    .modal.open{ display:flex; }
+    .modal-card{
+      width:min(92vw,640px); background:#0b1220; border:1px solid var(--border);
+      border-radius:16px; padding:18px; box-shadow:0 24px 60px rgba(0,0,0,.5);
     }
-    .toast.show{ opacity:1; transform:translateX(-50%) translateY(-6px) }
+    .modal-card h2{ margin:0 0 10px; font-size:20px; }
+    textarea{
+      width:100%; min-height:160px; resize:vertical;
+      background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:12px; padding:10px;
+      font-family: inherit; font-size:14px;
+    }
+    .modal-actions{ margin-top:12px; display:flex; gap:10px; justify-content:flex-end; }
 
-    /* Emoji rain */
-    .emoji { position:fixed; top:-60px; z-index:1; pointer-events:auto; user-select:none; }
+    /* Emoji rain (behind the card) */
+    .emoji{ position:fixed; top:-60px; z-index:1; pointer-events:auto; user-select:none; }
     .emoji .inner{
       display:block; filter: drop-shadow(0 3px 6px rgba(0,0,0,.35));
       animation: sway 7.5s ease-in-out infinite;
@@ -91,40 +105,49 @@
   </style>
 </head>
 <body>
-  <!-- HUD -->
-  <div class="hud" id="hud">
-    <span class="pill">Score: <b id="score">0</b></span>
-    <span class="pill">Streak: <b id="streak">0</b></span>
-    <span class="pill">Misses: <b id="misses">0</b></span>
-    <span class="pill">Time: <b id="time">—</b></span>
-    <span class="pill best">Best: <b id="best">0</b></span>
-    <button class="pill play" id="playBtn">▶️ Play 30s</button>
-  </div>
 
-  <!-- Toast -->
-  <div class="toast" id="toast"></div>
-
-  <!-- Card -->
-  <div class="card">
+  <!-- Main Card -->
+  <div class="card" id="card">
     <h1 id="title">Thank you, team!</h1>
-    <p class="msg" id="message">Hello everyone,
-      I’m writing to share that I’ll be leaving Laing O’Rourke to begin the next chapter of my career. Working at HPC has been a privilege — I’ve learned so much from each of you, and those lessons and experiences will stay with me. My last working day is Thursday, 4 September 2025.
-      If our paths cross in the future, I’d be delighted to work with you again. If you’d like to stay in touch, please use the “Get in touch” button </p>
+
+    <!-- Paragraphs -->
+    <div class="msg" id="message">
+      <p>Hello everyone,</p>
+      <p>I’m writing to share that I’ll be leaving Laing O’Rourke to begin the next chapter of my career. Working at HPC has been a privilege — I’ve learned so much from each of you, and those lessons and experiences will stay with me. My last working day is Thursday, 4 September 2025.</p>
+      <p>If our paths cross in the future, I’d be delighted to work with you again. If you’d like to stay in touch, please see the “Get in touch” options below — I’d love to hear from you.</p>
+    </div>
+
     <p class="meta" id="signature">— Irfana</p>
+
     <div class="row">
-      <button id="replay">🤝 Replay animation</button>
-      <button id="feedbackBtn">💬 Leave feedback</button>
+      <button id="sendMsgBtn" class="btn primary">💬 Send message to Irfana</button>
+
+      <div style="position:relative">
+        <button id="contactBtn" class="btn">🤝 Get in touch</button>
+        <div id="contactPopover" class="popover" aria-live="polite">
+          <div class="contact-line" style="margin-bottom:6px;">
+            📧 <span style="opacity:.9;">Irfanasultana@hotmail.co.uk</span>
+          </div>
+          <div class="contact-line" style="margin-bottom:10px;">
+            🔗 <a href="https://www.linkedin.com/in/irfanasultana/" target="_blank" rel="noopener noreferrer">linkedin.com/in/irfanasultana</a>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:4px;">
+            <a class="btn" href="mailto:Irfanasultana@hotmail.co.uk">Send Email</a>
+            <a class="btn" href="https://www.linkedin.com/in/irfanasultana/" target="_blank" rel="noopener noreferrer">Open LinkedIn</a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Feedback Modal -->
+  <!-- Send Message Modal -->
   <div class="modal" id="modal">
     <div class="modal-card">
-      <h2>💬 Share your feedback</h2>
+      <h2>💬 Send a message to Irfana</h2>
       <textarea id="fbText" placeholder="Write a quick note..."></textarea>
       <div class="modal-actions">
-        <button id="cancel">Cancel</button>
-        <button id="send">Send</button>
+        <button id="cancel" class="btn">Cancel</button>
+        <button id="send" class="btn primary">Send</button>
       </div>
     </div>
   </div>
@@ -132,229 +155,144 @@
   <!-- Hidden iframe target for Google Form submission -->
   <iframe name="gform-target" style="display:none"></iframe>
 
-<script>
-  const qs = new URLSearchParams(location.search);
+  <script>
+    /* ---------- content + background ---------- */
+    const qs   = new URLSearchParams(location.search);
+    const bg   = qs.get('bg') || "1.jpeg";
+    const name = qs.get('name') || "Irfana";
 
-  // Content
-  const title = qs.get('title') || "Thank you, team!";
-  const msg   = qs.get('msg')   || "Hello everyone,I’m writing to share that I’ll be leaving Laing O’Rourke to begin the next chapter of my career. Working at HPC has been a privilege — I’ve learned so much from each of you, and those lessons and experiences will stay with me. My last working day is Thursday, 4 September 2025. If our paths cross in the future, I’d be delighted to work with you again. If you’d like to stay in touch, please use the “Get in touch” button";
-  const name  = qs.get('name')  || "Irfana";
-  const bg    = qs.get('bg')    || "1.jpeg";
-
-  document.getElementById('title').textContent = title;
-  document.getElementById('message').textContent = msg;
-  document.getElementById('signature').textContent = `— ${name}`;
-  if (bg) {
-    const url = bg.match(/^https?:\/\//) ? bg : `${bg}`;
-    document.body.style.backgroundImage = `url('${url}')`; 
-    document.body.style.backgroundSize = 'cover';
-    document.body.style.backgroundPosition = 'center';
-  }
-
-  /* =================== RAIN + GAME =================== */
-  const EMOJIS = ["👋","💐", "🤝","👩‍💻","🙏","⚡","☢️","🏗️","💌"];
-  // Normal mode (slightly faster than before)
-  let CUR_MAX_ACTIVE = 18;
-  let CUR_SPAWN_MS   = 950;        // faster spawn
-  let CUR_DUR_RANGE  = [12, 20];   // faster fall
-
-  // Game mode presets (speed-up)
-  const GAME_MAX_ACTIVE = 24;
-  const GAME_SPAWN_MS   = 520;
-  const GAME_DUR_RANGE  = [8, 14];
-  const GAME_TIME       = 30; // seconds
-
-  // Lane-based even spread with jitter
-  let laneIndex = 0, spawner = null;
-  function lanes(){
-    const n = Math.max(10, Math.floor(window.innerWidth / 120));
-    const pad = 1.5;
-    const step = (100 - pad*2) / (n - 1);
-    return { n, pad, step };
-  }
-
-  function activeCount(){ return document.querySelectorAll('.emoji').length; }
-
-  function sparkle(x,y,txt="✨"){
-    const s = document.createElement('div');
-    s.className = 'sparkle';
-    s.textContent = txt;
-    s.style.left = x + "px";
-    s.style.top  = y + "px";
-    document.body.appendChild(s);
-    setTimeout(()=>s.remove(), 900);
-  }
-
-  // Game state
-  let gameActive = false, score=0, streak=0, misses=0, timeLeft=0, gameTimer=null, diffTimer=null;
-  const scoreEl = document.getElementById('score');
-  const streakEl= document.getElementById('streak');
-  const missEl  = document.getElementById('misses');
-  const timeEl  = document.getElementById('time');
-  const bestEl  = document.getElementById('best');
-  const playBtn = document.getElementById('playBtn');
-  let best = Number(localStorage.getItem('gb_best')||0); bestEl.textContent = best;
-
-  function updateHUD(){ scoreEl.textContent=score; streakEl.textContent=streak; missEl.textContent=misses; timeEl.textContent = gameActive? timeLeft : "—"; }
-
-  function spawnOne(xvw = null){
-    if (activeCount() >= CUR_MAX_ACTIVE) return;
-
-    const { n, pad, step } = lanes();
-    if (xvw === null){
-      xvw = pad + (laneIndex * step) + (Math.random()*step*0.4 - step*0.2);
-      laneIndex = (laneIndex + 1) % n;
+    // Optional override via ?p1=...&p2=...&p3=...
+    const p1 = qs.get('p1'), p2 = qs.get('p2'), p3 = qs.get('p3');
+    if (p1 || p2 || p3){
+      const msg = document.getElementById('message');
+      msg.innerHTML = [p1,p2,p3].filter(Boolean).map(t => `<p>${t}</p>`).join("");
     }
 
-    const wrap = document.createElement('div');
-    wrap.className = 'emoji';
-    wrap.style.left = xvw + "vw";
+    document.getElementById('signature').textContent = `— ${name}`;
 
-    const span = document.createElement('span');
-    span.className = 'inner';
-    span.textContent = EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
+    if (bg){
+      const url = bg.match(/^https?:\/\//) ? bg : `${bg}`;
+      document.body.style.backgroundImage = `url('${url}')`;
+      document.body.style.backgroundSize = 'cover';
+      document.body.style.backgroundPosition = 'center';
+    }
 
-    const dur   = CUR_DUR_RANGE[0] + Math.random() * (CUR_DUR_RANGE[1] - CUR_DUR_RANGE[0]);
-    const delay = Math.random() * 0.6;
-    const size  = 24 + Math.random() * 18;
-    const sway  = (Math.random()<.5?-1:1) * (12 + Math.random()*22);
-    const rot   = (Math.random()<.5?-1:1) * (5 + Math.random()*12) + "deg";
-
-    wrap.style.animation = `fall ${dur}s linear ${delay}s forwards`;
-    span.style.fontSize = size + "px";
-    span.style.setProperty('--sx', sway + "px");
-    span.style.setProperty('--rot', rot);
-
-    let clicked=false;
-    span.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      clicked=true;
-      const r = span.getBoundingClientRect();
-      // scoring
-      if (gameActive){
-        const gain = 1 + Math.min(streak, 5); // small streak bonus up to +5
-        score += gain; streak += 1; updateHUD();
-      }
-      wrap.classList.add('pop');
-      span.style.animation = 'popAway .55s ease-out forwards';
-      sparkle(r.left + r.width/2, r.top, "✨");
-      setTimeout(()=> wrap.remove(), 550);
+    /* ---------- Get in touch popover ---------- */
+    const contactBtn = document.getElementById('contactBtn');
+    const popover = document.getElementById('contactPopover');
+    contactBtn.addEventListener('click', () => {
+      popover.classList.toggle('open');
+    });
+    document.addEventListener('click', (e)=>{
+      if (!popover.contains(e.target) && !contactBtn.contains(e.target)) popover.classList.remove('open');
     });
 
-    wrap.appendChild(span);
-    document.body.appendChild(wrap);
+    /* ---------- Send message modal (Google Form submit) ---------- */
+    // From your pre-fill link → formResponse endpoint + field id:
+    // https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/viewform?usp=pp_url&entry.1175385091=...
+    const GF_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/formResponse";
+    const GF_FIELD  = "entry.1175385091";
 
-    // Miss tracking when it leaves bottom
-    const ttl = (dur+delay+0.6)*1000;
-    setTimeout(()=>{
-      if (gameActive && !clicked){ streak=0; misses+=1; updateHUD(); }
-      wrap.remove();
-    }, ttl);
-  }
+    const modal   = document.getElementById('modal');
+    const sendBtn = document.getElementById('send');
+    const cancel  = document.getElementById('cancel');
+    const openMsg = document.getElementById('sendMsgBtn');
+    const fbText  = document.getElementById('fbText');
 
-  function setSpawner(ms){
-    if (spawner){ clearInterval(spawner); spawner=null; }
-    spawner = setInterval(()=>spawnOne(), ms);
-  }
+    openMsg.addEventListener('click', ()=>{ modal.classList.add('open'); fbText.focus(); });
+    cancel .addEventListener('click', ()=> modal.classList.remove('open'));
 
-  // Start rain in normal mode
-  window.addEventListener('load', ()=> setSpawner(CUR_SPAWN_MS));
+    sendBtn.addEventListener('click', () => {
+      const msg = fbText.value.trim();
+      if (!msg){ alert("Please write a quick note first 🙂"); return; }
 
-  // Replay = small burst
-  document.getElementById('replay').addEventListener('click', ()=>{
-    for(let i=0;i<10;i++) setTimeout(()=>spawnOne(), i*100);
-  });
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = GF_ACTION;
+      form.target = 'gform-target';
 
-  // ===== Game control =====
-  function startGame(){
-    if (gameActive) return;
-    gameActive = true;
-    score=0; streak=0; misses=0; timeLeft=GAME_TIME; updateHUD();
+      const t = document.createElement('textarea');
+      t.name  = GF_FIELD;
+      t.value = `${msg}\n\n— sent from: ${location.href}`;
+      form.appendChild(t);
 
-    CUR_MAX_ACTIVE = GAME_MAX_ACTIVE;
-    CUR_SPAWN_MS   = GAME_SPAWN_MS;
-    CUR_DUR_RANGE  = [...GAME_DUR_RANGE];
-    setSpawner(CUR_SPAWN_MS);
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
 
-    // difficulty ramp every 10s: slightly quicker
-    diffTimer = setInterval(()=>{
-      CUR_SPAWN_MS = Math.max(360, CUR_SPAWN_MS-60);
-      CUR_DUR_RANGE = [Math.max(6, CUR_DUR_RANGE[0]-1), Math.max(10, CUR_DUR_RANGE[1]-1)];
-      setSpawner(CUR_SPAWN_MS);
-    }, 10000);
+      fbText.value = "";
+      modal.classList.remove('open');
+      alert("Thanks! Your message was sent ✅");
+    });
 
-    // countdown
-    gameTimer = setInterval(()=>{
-      timeLeft--; updateHUD();
-      if (timeLeft<=0) endGame();
-    }, 1000);
+    /* ---------- Continuous, natural emoji rain ---------- */
+    // Professional, construction-adjacent set
+    const EMOJIS = ["👋","🤝","💐","🏗️","🧱","🦺","🧰","🛠️","📐","🎉","💌"];
 
-    playBtn.disabled = true; playBtn.textContent = "⏳ Playing…";
-  }
+    const MAX_ACTIVE = 40;          // cap on screen
+    const SPAWN_MS   = 260;         // every 0.26s
+    const DUR_RANGE  = [10, 20];    // fall duration (s), varied per item
 
-  function endGame(){
-    gameActive = false;
-    clearInterval(gameTimer); clearInterval(diffTimer);
-    CUR_MAX_ACTIVE = 18; CUR_SPAWN_MS = 950; CUR_DUR_RANGE = [12,20];
-    setSpawner(CUR_SPAWN_MS);
+    function sparkle(x,y,txt="✨"){
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      s.textContent = txt;
+      s.style.left = x + "px";
+      s.style.top  = y + "px";
+      document.body.appendChild(s);
+      setTimeout(()=>s.remove(), 900);
+    }
 
-    // best score
-    if (score > best){ best = score; localStorage.setItem('gb_best', String(best)); bestEl.textContent = best; }
+    function activeCount(){ return document.querySelectorAll('.emoji').length; }
 
-    // toast
-    const t = document.getElementById('toast');
-    t.innerHTML = `Game over — <b>${score}</b> pts · Streak <b>${streak}</b> · Misses <b>${misses}</b> · Best <b>${best}</b>`;
-    t.classList.add('show');
-    setTimeout(()=> t.classList.remove('show'), 3000);
+    function spawnEmoji(){
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      if (activeCount() >= MAX_ACTIVE) return;
 
-    playBtn.disabled = false; playBtn.textContent = "▶️ Play 30s";
-    timeEl.textContent = "—";
-  }
+      const wrap = document.createElement('div');
+      wrap.className = 'emoji';
+      const span = document.createElement('span');
+      span.className = 'inner';
+      span.textContent = EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
 
-  document.getElementById('playBtn').addEventListener('click', startGame);
+      // random across whole viewport
+      const leftVW = Math.random()*100; // 0–100vw
+      const dur    = DUR_RANGE[0] + Math.random()*(DUR_RANGE[1]-DUR_RANGE[0]);
+      const delay  = Math.random()*0.5;
+      const size   = 22 + Math.random()*22;
+      const sway   = (Math.random()<.5?-1:1) * (10 + Math.random()*24);
+      const rot    = (Math.random()<.5?-1:1) * (4 + Math.random()*12) + "deg";
 
-  // Reduced motion
-  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-    clearInterval(spawner);
-  }
+      wrap.style.left = leftVW + "vw";
+      wrap.style.animation = `fall ${dur}s linear ${delay}s forwards`;
+      span.style.fontSize = size + "px";
+      span.style.setProperty('--sx', sway + "px");
+      span.style.setProperty('--rot', rot);
 
-  /* ====== Google Form direct submit (no email) ====== */
-  const GF_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/formResponse";
-  const GF_FEEDBACK_FIELD = "entry.1175385091";
+      let popped = false;
+      span.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        popped = true;
+        const r = span.getBoundingClientRect();
+        wrap.classList.add('pop');
+        span.style.animation = 'popAway .55s ease-out forwards';
+        sparkle(r.left + r.width/2, r.top, "✨");
+        setTimeout(()=> wrap.remove(), 550);
+      });
 
-  const modal = document.getElementById('modal');
-  const feedbackBtn = document.getElementById('feedbackBtn');
-  const cancelBtn = document.getElementById('cancel');
-  const sendBtn = document.getElementById('send');
-  const fbText = document.getElementById('fbText');
+      wrap.appendChild(span);
+      document.body.appendChild(wrap);
 
-  feedbackBtn.addEventListener('click', () => { modal.classList.add('open'); fbText.focus(); });
-  cancelBtn.addEventListener('click', () => modal.classList.remove('open'));
+      // clean up once it reaches the bottom
+      setTimeout(()=>{ if (!popped) wrap.remove(); }, (dur+delay+0.8)*1000);
+    }
 
-  sendBtn.addEventListener('click', () => {
-    const message = fbText.value.trim();
-    if (!message){ alert("Please write a quick note first."); return; }
-
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = GF_ACTION;
-    form.target = 'gform-target';
-
-    const msgInput = document.createElement('textarea');
-    msgInput.name = GF_FEEDBACK_FIELD;
-    msgInput.value = `${message}\n\n— sent from: ${location.href}`;
-    form.appendChild(msgInput);
-
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-
-    alert("Thanks! Your feedback was sent ✅");
-    modal.classList.remove('open');
-    fbText.value = "";
-  });
-</script>
+    // kick off continuous rain
+    window.addEventListener('load', ()=>{
+      setInterval(spawnEmoji, SPAWN_MS);  // continuous, dispersed
+      // small initial burst so it feels “already raining”
+      for (let i=0;i<14;i++) setTimeout(spawnEmoji, i*90);
+    });
+  </script>
 </body>
 </html>
-
-
