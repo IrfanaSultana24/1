@@ -137,7 +137,7 @@
 
   // Content
   const title = qs.get('title') || "Thank you, team!";
-  const msg   = qs.get('msg')   || "It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!";
+  const msg   = qs.get('msg')   || "Hello everyone,I’m writing to share that I’ll be leaving Laing O’Rourke to begin the next chapter of my career. Working at HPC has been a privilege — I’ve learned so much from each of you, and those lessons and experiences will stay with me. My last working day is Thursday, 4 September 2025. If our paths cross in the future, I’d be delighted to work with you again. If you’d like to stay in touch, please use the “Get in touch” button";
   const name  = qs.get('name')  || "Irfana";
   const bg    = qs.get('bg')    || "1.jpeg";
 
@@ -146,7 +146,7 @@
   document.getElementById('signature').textContent = `— ${name}`;
   if (bg) {
     const url = bg.match(/^https?:\/\//) ? bg : `${bg}`;
-    document.body.style.backgroundImage = `url('${url}')`;
+    document.body.style.backgroundImage = `url('${url}')`; 
     document.body.style.backgroundSize = 'cover';
     document.body.style.backgroundPosition = 'center';
   }
@@ -356,4 +356,5 @@
 </script>
 </body>
 </html>
+
 
