@@ -1,118 +1,118 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>👷‍♀️ Farewell Runner — Irfana</title>
-<style>
-  :root{
-    --text:#e2e8f0; --muted:#9fb0c3; --border:#223148; --card:#0b1220cc; --pill:#0e1728;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0}
-  body{
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial;
-    color:var(--text);
-    display:grid; gap:14px; place-items:center; align-content:start;
-    background:#0a1424 center/cover no-repeat fixed;   /* replaced with your photo by JS */
-  }
-  /* dark soft overlay so text stays readable over photos */
-  body::before{
-    content:""; position:fixed; inset:0; pointer-events:none; z-index:-1;
-    background: radial-gradient(1100px 700px at 12% 10%, rgba(9,14,24,.55), rgba(6,10,18,.86));
-  }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🎉 A Little Goodbye</title>
+  <style>
+    :root{
+      --bg1:#0f172a; --bg2:#1e293b;
+      --card:#0b1220cc; /* adjust transparency via last two hex digits */
+      --text:#e2e8f0; --border:#1f2a44;
+      --accent:#30c48d;
+    }
+    html,body{height:100%;margin:0}
+    body{
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial;
+      color:var(--text);
+      display:grid; place-items:center;
+      background: radial-gradient(1200px 800px at 10% 10%, var(--bg2), var(--bg1));
+      background-size: cover; background-position: center; background-attachment: fixed;
+      overflow-x:hidden;
+    }
 
-  .card{
-    width:min(92vw, 900px);
-    background:var(--card); border:1px solid var(--border);
-    border-radius:18px; padding:18px 18px 12px;
-    box-shadow:0 22px 48px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.06);
-    backdrop-filter: blur(10px);
-  }
-  h1{margin:0 0 6px; font-size:clamp(22px,4.8vw,32px)}
-  .msg{margin:0 0 10px; color:var(--muted); font-size:clamp(14px,2.6vw,16px)}
-  .legend{margin:2px 0 0; font-size:12px; opacity:.9}
+    .card{
+      position:relative; z-index:2; max-width:720px; width:min(92vw,720px);
+      backdrop-filter: blur(12px);
+      background: var(--card);
+      border:1px solid var(--border); border-radius:20px;
+      padding:28px 28px 22px;
+      box-shadow:0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    h1{ font-size: clamp(28px,5vw,44px); margin:8px 0 10px; line-height:1.1; }
+    .msg{ font-size: clamp(16px,2.6vw,20px); opacity:.92; margin:0 0 14px; }
+    .meta{ opacity:.8; font-size:14px; margin-top:6px; }
+    .row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+    button{
+      appearance:none; border:1px solid #334155; background:#0b1220; color:var(--text);
+      padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600;
+      transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    button:hover{ border-color:#475569; box-shadow:0 8px 20px rgba(0,0,0,.25); transform:translateY(-1px); }
 
-  .wrap{
-    position:relative; width:min(96vw, 980px); aspect-ratio: 9/3;
-    border:1px solid var(--border); border-radius:16px; overflow:hidden;
-    background:linear-gradient(#0c1526, #0a1220);
-    box-shadow:0 22px 60px rgba(0,0,0,.42);
-  }
-  canvas{width:100%; height:100%; display:block}
+    /* HUD (game) */
+    .hud{
+      position:fixed; right:14px; top:14px; z-index:5; display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+      background:#0b1220cc; border:1px solid var(--border); border-radius:12px; padding:8px 10px; backdrop-filter: blur(8px);
+      font-size:12px;
+    }
+    .hud .pill{ padding:4px 8px; border:1px solid #2b3b52; border-radius:10px; background:#0e1728; }
+    .hud .best{ border-color:#2e5a4c; }
+    .hud .play{ border-color:#355281; }
 
-  .hud, .controls{
-    position:absolute; z-index:3; display:flex; gap:8px; flex-wrap:wrap; align-items:center;
-    background:#0b1220bf; border:1px solid var(--border); border-radius:12px; padding:6px 8px; font-size:12px; backdrop-filter:blur(8px)
-  }
-  .hud{left:10px; top:10px}
-  .controls{right:10px; top:10px}
-  .pill{padding:4px 8px; border:1px solid #2b3b52; background:var(--pill); border-radius:10px}
-  .accent{border-color:#2e5a4c}
+    /* Toast */
+    .toast{
+      position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:6;
+      background:#0b1220cc; border:1px solid var(--border); border-radius:12px; padding:10px 14px;
+      box-shadow:0 12px 30px rgba(0,0,0,.35); backdrop-filter: blur(8px); font-weight:600;
+      opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
+    }
+    .toast.show{ opacity:1; transform:translateX(-50%) translateY(-6px) }
 
-  .controls button, .row button{
-    appearance:none; border:1px solid #334155; background:#0b1220; color:var(--text);
-    padding:8px 10px; border-radius:10px; font-weight:600; cursor:pointer
-  }
-  .controls button:hover, .row button:hover{border-color:#475569}
+    /* Emoji rain */
+    .emoji { position:fixed; top:-60px; z-index:1; pointer-events:auto; user-select:none; }
+    .emoji .inner{
+      display:block; filter: drop-shadow(0 3px 6px rgba(0,0,0,.35));
+      animation: sway 7.5s ease-in-out infinite;
+      transition: transform .12s ease, opacity .2s ease;
+      cursor:pointer;
+    }
+    .emoji .inner:hover{ transform: scale(1.12) }
+    .emoji.pop .inner{ animation:none }
 
-  .touch{position:absolute; inset:auto 0 10px 0; z-index:3; display:flex; gap:10px; justify-content:center}
-  .touch button{min-width:92px; padding:12px 14px; border-radius:12px; background:#0b1220cc}
+    @keyframes fall { to { transform: translateY(110vh); opacity:1; } }
+    @keyframes sway { 0%{ transform: translateX(0) rotate(0deg); }
+                      50%{ transform: translateX(var(--sx, 22px)) rotate(var(--rot, 10deg)); }
+                      100%{ transform: translateX(0) rotate(0deg); } }
+    @keyframes popAway { 0%{ transform: translateY(0) scale(1); opacity:1 }
+                         60%{ transform: translateY(-18px) scale(1.35); opacity:.95 }
+                         100%{ transform: translateY(-46px) scale(.6); opacity:0 } }
+    .sparkle{
+      position:fixed; z-index:3; pointer-events:none; color:#ffe08a; font-size:18px;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,.35)); animation: sparkleUp .8s ease-out forwards;
+    }
+    @keyframes sparkleUp{ 0%{ transform: translateY(0) scale(.9); opacity:.95 }
+                          100%{ transform: translateY(-28px) scale(1.1); opacity:0 } }
 
-  .toast{
-    position:absolute; left:50%; bottom:12px; transform:translateX(-50%);
-    background:#0b1220cc; border:1px solid var(--border); border-radius:12px; padding:8px 12px; font-weight:700;
-    box-shadow:0 12px 30px rgba(0,0,0,.35); backdrop-filter: blur(8px);
-    opacity:0; transition:opacity .25s, transform .25s; pointer-events:none; z-index:4
-  }
-  .toast.show{opacity:1; transform:translateX(-50%) translateY(-6px)}
-
-  .row{display:flex; gap:10px; flex-wrap:wrap}
-
-  /* Feedback modal */
-  .modal{position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.45); padding:18px}
-  .modal.open{display:flex}
-  .modal-card{width:min(92vw,620px); background:#0b1220; border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:0 24px 60px rgba(0,0,0,.5)}
-  .modal-card h2{margin:0 0 10px; font-size:20px}
-  textarea{width:100%; min-height:140px; background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:12px; padding:10px; font:inherit}
-</style>
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .emoji .inner{ animation:none }
+    }
+  </style>
 </head>
 <body>
-  <div class="card">
-    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-      <div>
-        <h1>Thank you, team!</h1>
-        <p class="msg">It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead.</p>
-        <p class="legend">Controls: <b>Space/↑ Jump</b>, <b>↓ Duck</b>, <b>H Help (crane)</b>, <b>P Pause</b>, <b>R Restart</b>.</p>
-      </div>
-      <button id="feedbackBtn">💬 Leave feedback</button>
-    </div>
+  <!-- HUD -->
+  <div class="hud" id="hud">
+    <span class="pill">Score: <b id="score">0</b></span>
+    <span class="pill">Streak: <b id="streak">0</b></span>
+    <span class="pill">Misses: <b id="misses">0</b></span>
+    <span class="pill">Time: <b id="time">—</b></span>
+    <span class="pill best">Best: <b id="best">0</b></span>
+    <button class="pill play" id="playBtn">▶️ Play 30s</button>
   </div>
 
-  <div class="wrap" id="wrap">
-    <canvas id="game" aria-label="Construction runner game"></canvas>
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
 
-    <div class="hud">
-      <span class="pill">Score: <b id="score">0</b></span>
-      <span class="pill">Speed: <b id="speed">1.0x</b></span>
-      <span class="pill">Lives: <b id="lives">⛑️⛑️⛑️</b></span>
-      <span class="pill accent">Best: <b id="best">0</b></span>
+  <!-- Card -->
+  <div class="card">
+    <h1 id="title">Thank you, team!</h1>
+    <p class="msg" id="message">It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!</p>
+    <p class="meta" id="signature">— Irfana</p>
+    <div class="row">
+      <button id="replay">🤝 Replay animation</button>
+      <button id="feedbackBtn">💬 Leave feedback</button>
     </div>
-
-    <div class="controls">
-      <button id="playBtn">▶️ Play</button>
-      <button id="helpBtn">🆘 Help (Crane)</button>
-      <button id="pauseBtn">⏸️ Pause</button>
-      <button id="restartBtn">🔁 Restart</button>
-    </div>
-
-    <div class="touch">
-      <button id="jumpT">⤴️ Jump</button>
-      <button id="duckT">↧ Duck</button>
-      <button id="helpT">🆘 Help</button>
-    </div>
-
-    <div class="toast" id="toast"></div>
   </div>
 
   <!-- Feedback Modal -->
@@ -120,459 +120,237 @@
     <div class="modal-card">
       <h2>💬 Share your feedback</h2>
       <textarea id="fbText" placeholder="Write a quick note..."></textarea>
-      <div class="row" style="justify-content:flex-end">
+      <div class="modal-actions">
         <button id="cancel">Cancel</button>
         <button id="send">Send</button>
       </div>
     </div>
   </div>
 
-  <!-- Hidden iframe for Google Form POST -->
+  <!-- Hidden iframe target for Google Form submission -->
   <iframe name="gform-target" style="display:none"></iframe>
 
 <script>
-/* -------------------------------------------------------------
-   Background image (your 1.jpeg or ?bg=...)
-------------------------------------------------------------- */
-{
   const qs = new URLSearchParams(location.search);
-  const bg = qs.get('bg') || "1.jpeg";
-  const url = /^https?:\/\//.test(bg) ? bg : bg;
-  document.body.style.backgroundImage = `url('${url}')`;
-}
 
-/* -------------------------------------------------------------
-   Canvas & HUD
-------------------------------------------------------------- */
-const canvas = document.getElementById('game');
-const wrap = document.getElementById('wrap');
-const ctx = canvas.getContext('2d', { alpha:true });
+  // Content
+  const title = qs.get('title') || "Thank you, team!";
+  const msg   = qs.get('msg')   || "It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead!";
+  const name  = qs.get('name')  || "Irfana";
+  const bg    = qs.get('bg')    || "1.jpeg";
 
-function resize(){
-  const dpr = Math.max(1, Math.min(2, window.devicePixelRatio||1));
-  const w = wrap.clientWidth, h = wrap.clientHeight;
-  canvas.width = Math.floor(w*dpr); canvas.height = Math.floor(h*dpr);
-  canvas.style.width = w+"px"; canvas.style.height = h+"px";
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-}
-resize(); addEventListener('resize', resize);
-
-const scoreEl = document.getElementById('score');
-const speedEl = document.getElementById('speed');
-const livesEl = document.getElementById('lives');
-const bestEl  = document.getElementById('best');
-const toast   = document.getElementById('toast');
-function showToast(t){ toast.innerHTML=t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 2000); }
-
-/* -------------------------------------------------------------
-   Controls
-------------------------------------------------------------- */
-const playBtn = document.getElementById('playBtn');
-const pauseBtn= document.getElementById('pauseBtn');
-const restartBtn=document.getElementById('restartBtn');
-const helpBtn  = document.getElementById('helpBtn');
-const jumpT    = document.getElementById('jumpT');
-const duckT    = document.getElementById('duckT');
-const helpT    = document.getElementById('helpT');
-
-/* -------------------------------------------------------------
-   Runner sprite / fallback vector
-------------------------------------------------------------- */
-const SPRITE_CONFIG = {
-  src: "worker_run.png",  // PLACE THIS PNG IN YOUR REPO (8 frames, 1 row)
-  cols: 8, rows: 1,
-  frameW: 128, frameH: 128,    // change if your sheet uses different frame size
-  scale: 0.66                  // overall on-canvas scale
-};
-const runnerImg = new Image();
-let spriteLoaded = false;
-runnerImg.onload = ()=> spriteLoaded = true;
-runnerImg.onerror = ()=> spriteLoaded = false;
-runnerImg.src = SPRITE_CONFIG.src;
-
-/* -------------------------------------------------------------
-   Game constants
-------------------------------------------------------------- */
-const H = ()=> wrap.clientHeight, W = ()=> wrap.clientWidth;
-const GROUND = ()=> H()-50;
-
-const PLAYER = {
-  x: 120, y: 0, w: 46, h: 56,    // visible bounds (slightly bigger)
-  vy: 0, onGround:true, duck:false,
-  airlift:false, airTimer:0,
-  frame:0, frameTime:0           // sprite animation
-};
-
-const GRAVITY = 1600, JUMP_V = -640, DUCK_H = 38;
-const MAX_LIVES = 3;
-const START_SPEED = 360, MAX_SPEED = 760;
-const SPAWN_BASE = 1050, SPAWN_VAR = 600;
-
-/* Obstacles in vector style (no emoji) */
-function makeObstacle(){
-  const r = Math.random();
-  if (r < 0.5) return {kind:'barricade', w:48, h:40, x:0, y:0};
-  if (r < 0.8) return {kind:'beam',      w:84, h:22, x:0, y:0};
-  const width = 120 + Math.random()*100;
-  return {kind:'hole', w:width, h:24, x:0, y:0};
-}
-
-/* -------------------------------------------------------------
-   State
-------------------------------------------------------------- */
-let best = Number(localStorage.getItem('runner_best')||0); bestEl.textContent = best;
-let lives, score, speed, paused, gameOver, obstacles, lastSpawn, spawnDelay, lastTime;
-let helpCharges, helpCooldown, dust=[];
-
-function reset(){
-  lives=MAX_LIVES; score=0; speed=START_SPEED; paused=true; gameOver=false;
-  obstacles=[]; lastSpawn=0; spawnDelay=SPAWN_BASE; helpCharges=2; helpCooldown=0;
-  dust.length=0;
-  PLAYER.y = GROUND()-PLAYER.h; PLAYER.vy=0; PLAYER.onGround=true; PLAYER.duck=false; PLAYER.airlift=false; PLAYER.airTimer=0; PLAYER.frame=0; PLAYER.frameTime=0;
-  render(0); updateUI();
-}
-reset();
-
-/* -------------------------------------------------------------
-   UI helpers
-------------------------------------------------------------- */
-function updateUI(){
-  scoreEl.textContent = Math.floor(score);
-  livesEl.textContent = "⛑️".repeat(lives) || "—";
-  speedEl.textContent = (speed/START_SPEED).toFixed(1)+"x";
-  helpBtn.textContent = `🆘 Help (Crane) ${helpCharges>0 ? `· ${helpCharges}` : helpCooldown>0 ? `· cooldown` : ''}`;
-}
-
-/* -------------------------------------------------------------
-   Input
-------------------------------------------------------------- */
-function jump(){ if (!paused && !gameOver && PLAYER.onGround && !PLAYER.airlift){ PLAYER.vy=JUMP_V; PLAYER.onGround=false; } }
-function setDuck(on){ if (!paused && !gameOver && PLAYER.onGround && !PLAYER.airlift){ PLAYER.duck=on; } }
-function tryHelp(){
-  if (paused||gameOver) return;
-  if (helpCharges<=0 || helpCooldown>0 || PLAYER.airlift) return;
-  PLAYER.airlift=true; PLAYER.airTimer=1100; helpCharges--; helpCooldown=3500; showToast("🪝 Crane lifting…");
-}
-
-document.addEventListener('keydown', e=>{
-  if (e.code==='Space' || e.code==='ArrowUp'){ e.preventDefault(); jump(); }
-  if (e.code==='ArrowDown'){ e.preventDefault(); setDuck(true); }
-  if (e.key==='h' || e.key==='H'){ tryHelp(); }
-  if (e.key==='p' || e.key==='P'){ togglePause(); }
-  if (e.key==='r' || e.key==='R'){ reset(); paused=false; startLoop(); }
-});
-document.addEventListener('keyup', e=>{ if (e.code==='ArrowDown'){ setDuck(false); } });
-jumpT.onclick = jump; duckT.onpointerdown=()=>setDuck(true); duckT.onpointerup=()=>setDuck(false); helpT.onclick=tryHelp;
-
-playBtn.onclick = ()=>{ if (gameOver) reset(); paused=false; startLoop(); };
-pauseBtn.onclick= ()=> togglePause();
-restartBtn.onclick=()=>{ reset(); paused=false; startLoop(); };
-helpBtn.onclick = tryHelp;
-
-function togglePause(){ if (gameOver) return; paused = !paused; if (!paused) startLoop(); }
-
-/* -------------------------------------------------------------
-   Simulation
-------------------------------------------------------------- */
-function rectsOverlap(ax,ay,aw,ah,bx,by,bw,bh){ return ax<bx+bw && ax+aw>bx && ay<by+bh && ay+ah>by; }
-
-function spawnIfNeeded(ms){
-  lastSpawn += ms;
-  if (lastSpawn >= spawnDelay){
-    lastSpawn=0;
-    const o = makeObstacle();
-    o.x = W()+20;
-    o.y = (o.kind==='barricade') ? GROUND()-o.h :
-          (o.kind==='beam')     ? GROUND()-110 :
-                                   GROUND();
-    obstacles.push(o);
-    spawnDelay = SPAWN_BASE - Math.min(520, (speed-START_SPEED)*0.8) + Math.random()*SPAWN_VAR;
-  }
-}
-
-function addDust(){
-  // small grounded dust puffs when running
-  if (!PLAYER.onGround || PLAYER.airlift) return;
-  if (Math.random()<0.5) return;
-  dust.push({x:PLAYER.x+8+Math.random()*12, y:GROUND()-6, r:2+Math.random()*2, a:.35, vx:-speed*0.004, vy:-15-Math.random()*12});
-  if (dust.length>60) dust.shift();
-}
-
-function update(dt){
-  speed = Math.min(MAX_SPEED, speed + dt*8);
-  score += dt * (speed/40);
-  if (helpCooldown>0) helpCooldown = Math.max(0, helpCooldown - dt*1000);
-
-  if (PLAYER.airlift){
-    PLAYER.airTimer -= dt*1000;
-    const lift = 120;
-    PLAYER.y = GROUND() - PLAYER.h - lift;
-    if (PLAYER.airTimer<=0){ PLAYER.airlift=false; PLAYER.onGround=false; showToast("✅ Safe across"); }
-  }else{
-    const targetH = PLAYER.duck? DUCK_H : 56;
-    if (PLAYER.h !== targetH){ PLAYER.h = targetH; if (PLAYER.onGround) PLAYER.y = GROUND()-PLAYER.h; }
-    PLAYER.vy += GRAVITY*dt; PLAYER.y += PLAYER.vy*dt;
-    const gy = GROUND()-PLAYER.h;
-    if (PLAYER.y >= gy){ PLAYER.y=gy; PLAYER.vy=0; PLAYER.onGround=true; }
+  document.getElementById('title').textContent = title;
+  document.getElementById('message').textContent = msg;
+  document.getElementById('signature').textContent = `— ${name}`;
+  if (bg) {
+    const url = bg.match(/^https?:\/\//) ? bg : `${bg}`;
+    document.body.style.backgroundImage = `url('${url}')`;
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center';
   }
 
-  for (const o of obstacles) o.x -= speed*dt;
-  obstacles = obstacles.filter(o=> o.x + o.w > -40);
+  /* =================== RAIN + GAME =================== */
+  const EMOJIS = ["👋","💐", "🤝","👩‍💻","🙏","⚡","☢️","🏗️","💌"];
+  // Normal mode (slightly faster than before)
+  let CUR_MAX_ACTIVE = 18;
+  let CUR_SPAWN_MS   = 950;        // faster spawn
+  let CUR_DUR_RANGE  = [12, 20];   // faster fall
 
-  spawnIfNeeded(dt*1000);
-  addDust();
+  // Game mode presets (speed-up)
+  const GAME_MAX_ACTIVE = 24;
+  const GAME_SPAWN_MS   = 520;
+  const GAME_DUR_RANGE  = [8, 14];
+  const GAME_TIME       = 30; // seconds
 
-  // collisions
-  for (const o of obstacles){
-    if (o.kind==='hole'){
-      const center = PLAYER.x + PLAYER.w/2;
-      const inHole = center>o.x && center<o.x+o.w;
-      const feetGround = PLAYER.y + PLAYER.h >= GROUND()-2;
-      if (!PLAYER.airlift && inHole && feetGround){ loseLife(); break; }
-    } else if (o.kind==='barricade'){
-      if (rectsOverlap(PLAYER.x,PLAYER.y,PLAYER.w,PLAYER.h, o.x,o.y,o.w,o.h)){ loseLife(); break; }
-    } else if (o.kind==='beam'){
-      if (rectsOverlap(PLAYER.x,PLAYER.y,PLAYER.w,PLAYER.h, o.x,o.y,o.w,o.h) && !PLAYER.duck){ loseLife(); break; }
+  // Lane-based even spread with jitter
+  let laneIndex = 0, spawner = null;
+  function lanes(){
+    const n = Math.max(10, Math.floor(window.innerWidth / 120));
+    const pad = 1.5;
+    const step = (100 - pad*2) / (n - 1);
+    return { n, pad, step };
+  }
+
+  function activeCount(){ return document.querySelectorAll('.emoji').length; }
+
+  function sparkle(x,y,txt="✨"){
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.textContent = txt;
+    s.style.left = x + "px";
+    s.style.top  = y + "px";
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(), 900);
+  }
+
+  // Game state
+  let gameActive = false, score=0, streak=0, misses=0, timeLeft=0, gameTimer=null, diffTimer=null;
+  const scoreEl = document.getElementById('score');
+  const streakEl= document.getElementById('streak');
+  const missEl  = document.getElementById('misses');
+  const timeEl  = document.getElementById('time');
+  const bestEl  = document.getElementById('best');
+  const playBtn = document.getElementById('playBtn');
+  let best = Number(localStorage.getItem('gb_best')||0); bestEl.textContent = best;
+
+  function updateHUD(){ scoreEl.textContent=score; streakEl.textContent=streak; missEl.textContent=misses; timeEl.textContent = gameActive? timeLeft : "—"; }
+
+  function spawnOne(xvw = null){
+    if (activeCount() >= CUR_MAX_ACTIVE) return;
+
+    const { n, pad, step } = lanes();
+    if (xvw === null){
+      xvw = pad + (laneIndex * step) + (Math.random()*step*0.4 - step*0.2);
+      laneIndex = (laneIndex + 1) % n;
     }
+
+    const wrap = document.createElement('div');
+    wrap.className = 'emoji';
+    wrap.style.left = xvw + "vw";
+
+    const span = document.createElement('span');
+    span.className = 'inner';
+    span.textContent = EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
+
+    const dur   = CUR_DUR_RANGE[0] + Math.random() * (CUR_DUR_RANGE[1] - CUR_DUR_RANGE[0]);
+    const delay = Math.random() * 0.6;
+    const size  = 24 + Math.random() * 18;
+    const sway  = (Math.random()<.5?-1:1) * (12 + Math.random()*22);
+    const rot   = (Math.random()<.5?-1:1) * (5 + Math.random()*12) + "deg";
+
+    wrap.style.animation = `fall ${dur}s linear ${delay}s forwards`;
+    span.style.fontSize = size + "px";
+    span.style.setProperty('--sx', sway + "px");
+    span.style.setProperty('--rot', rot);
+
+    let clicked=false;
+    span.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      clicked=true;
+      const r = span.getBoundingClientRect();
+      // scoring
+      if (gameActive){
+        const gain = 1 + Math.min(streak, 5); // small streak bonus up to +5
+        score += gain; streak += 1; updateHUD();
+      }
+      wrap.classList.add('pop');
+      span.style.animation = 'popAway .55s ease-out forwards';
+      sparkle(r.left + r.width/2, r.top, "✨");
+      setTimeout(()=> wrap.remove(), 550);
+    });
+
+    wrap.appendChild(span);
+    document.body.appendChild(wrap);
+
+    // Miss tracking when it leaves bottom
+    const ttl = (dur+delay+0.6)*1000;
+    setTimeout(()=>{
+      if (gameActive && !clicked){ streak=0; misses+=1; updateHUD(); }
+      wrap.remove();
+    }, ttl);
   }
 
-  updateUI();
-}
-
-function loseLife(){
-  lives--;
-  showToast(lives>0? "💥 Ouch! −1 life" : "💥 Out of lives");
-  PLAYER.y=GROUND()-PLAYER.h; PLAYER.vy=0; PLAYER.onGround=true; PLAYER.duck=false; PLAYER.airlift=false; PLAYER.airTimer=0;
-  obstacles = obstacles.filter(o=> o.x > PLAYER.x + 46);
-  if (lives<=0) endGame();
-}
-
-function endGame(){
-  gameOver=true; paused=true;
-  if (Math.floor(score) > best){ best=Math.floor(score); localStorage.setItem('runner_best', String(best)); }
-  bestEl.textContent = best;
-  showToast(`Game over — Score <b>${Math.floor(score)}</b> · Best <b>${best}</b>`);
-}
-
-/* -------------------------------------------------------------
-   Rendering (parallax grid, vector obstacles, sprite runner)
-------------------------------------------------------------- */
-function drawGrid(ts){
-  ctx.save(); ctx.globalAlpha=.06; ctx.strokeStyle='#8ab3ff'; ctx.lineWidth=1;
-  const step=24, xoff=(ts/80)%step;
-  for(let x=xoff; x<W(); x+=step){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H()); ctx.stroke(); }
-  for(let y=0; y<H(); y+=step){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W(),y); ctx.stroke(); }
-  ctx.restore();
-}
-function drawGround(){
-  ctx.strokeStyle = '#2a3b55'; ctx.lineWidth=3;
-  ctx.beginPath(); ctx.moveTo(0,GROUND()+.5); ctx.lineTo(W(),GROUND()+.5); ctx.stroke();
-}
-function drawHole(o){
-  const y = o.y, h = 30;
-  ctx.save();
-  const grad = ctx.createLinearGradient(0,y,0,y+h);
-  grad.addColorStop(0,'#07101f'); grad.addColorStop(1,'#000814');
-  ctx.fillStyle = grad; ctx.fillRect(o.x, y, o.w, h);
-  ctx.restore();
-}
-function drawBarricade(o){
-  ctx.save();
-  // frame
-  ctx.fillStyle='#1a263a'; ctx.fillRect(o.x, o.y, o.w, o.h);
-  // stripes
-  const stripeW = 10;
-  for(let x=o.x; x<o.x+o.w+o.h; x+=stripeW){
-    ctx.fillStyle = ((Math.floor((x-o.x)/stripeW)%2)===0) ? '#ffc43d' : '#1e293b';
-    ctx.beginPath();
-    ctx.moveTo(x, o.y);
-    ctx.lineTo(x+stripeW, o.y);
-    ctx.lineTo(x, o.y+o.h);
-    ctx.closePath();
-    ctx.fill();
-  }
-  ctx.strokeStyle='#2b3b52'; ctx.lineWidth=2; ctx.strokeRect(o.x+0.5, o.y+0.5, o.w-1, o.h-1);
-  ctx.restore();
-}
-function drawBeam(o){
-  ctx.save();
-  const r=8;
-  ctx.fillStyle='#ffd166';
-  ctx.beginPath();
-  ctx.moveTo(o.x+r, o.y);
-  ctx.lineTo(o.x+o.w-r, o.y);
-  ctx.quadraticCurveTo(o.x+o.w, o.y, o.x+o.w, o.y+r);
-  ctx.lineTo(o.x+o.w, o.y+o.h-r);
-  ctx.quadraticCurveTo(o.x+o.w, o.y+o.h, o.x+o.w-r, o.y+o.h);
-  ctx.lineTo(o.x+r, o.y+o.h);
-  ctx.quadraticCurveTo(o.x, o.y+o.h, o.x, o.y+o.h-r);
-  ctx.lineTo(o.x, o.y+r);
-  ctx.quadraticCurveTo(o.x, o.y, o.x+r, o.y);
-  ctx.fill();
-  // hazard diagonal
-  ctx.strokeStyle='#2e3a54'; ctx.lineWidth=3; ctx.globalAlpha=.5;
-  for(let x=o.x-12; x<o.x+o.w+o.h; x+=14){
-    ctx.beginPath(); ctx.moveTo(x, o.y+o.h); ctx.lineTo(x+28, o.y); ctx.stroke();
-  }
-  ctx.restore();
-}
-function drawDust(){
-  ctx.save();
-  for(const p of dust){
-    p.x += p.vx; p.y += p.vy*0.016; p.vy += 22*0.016; p.a -= 0.01;
-    ctx.globalAlpha=Math.max(0,p.a);
-    ctx.fillStyle='#96a7c3';
-    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
-  }
-  dust = dust.filter(p=>p.a>0);
-  ctx.restore();
-}
-
-function drawRunner(ts){
-  // drop shadow
-  ctx.save();
-  const shadowY = GROUND()+2;
-  ctx.globalAlpha = 0.25;
-  ctx.fillStyle = '#000';
-  const shW = 28, shH = 6;
-  ctx.beginPath();
-  ctx.ellipse(PLAYER.x+PLAYER.w*0.45, shadowY, shW, shH, 0, 0, Math.PI*2);
-  ctx.fill();
-  ctx.restore();
-
-  // sprite or fallback vector
-  if (spriteLoaded){
-    // animate frames only when moving on ground
-    const frameRate = 12; // FPS
-    if (PLAYER.onGround && !paused && !gameOver && !PLAYER.airlift){
-      PLAYER.frameTime += (ts - (drawRunner.prevTs||ts));
-      const frameDur = 1000/frameRate;
-      while (PLAYER.frameTime >= frameDur){ PLAYER.frame=(PLAYER.frame+1)%SPRITE_CONFIG.cols; PLAYER.frameTime-=frameDur; }
-    } else {
-      // airborne: hold a mid frame
-      PLAYER.frame = 2;
-    }
-    drawRunner.prevTs = ts;
-
-    const fw = SPRITE_CONFIG.frameW, fh = SPRITE_CONFIG.frameH;
-    const scale = SPRITE_CONFIG.scale * (PLAYER.duck ? 0.85 : 1);
-    const dw = fw*scale, dh = fh*scale;
-
-    const sx = PLAYER.frame*fw, sy = 0;
-    const dx = PLAYER.x - 6, dy = PLAYER.y + PLAYER.h - dh;  // align feet to ground
-    ctx.imageSmoothingEnabled = true;
-    ctx.drawImage(runnerImg, sx, sy, fw, fh, dx, dy, dw, dh);
-  } else {
-    // fallback flat vector runner
-    ctx.save();
-    ctx.translate(PLAYER.x+PLAYER.w*0.3, PLAYER.y+PLAYER.h);
-    // body
-    ctx.strokeStyle='#f1f5f9'; ctx.lineWidth=3;
-    // head (helmet)
-    ctx.fillStyle='#ffd166';
-    ctx.beginPath(); ctx.arc(0,-28,8,0,Math.PI*2); ctx.fill();
-    // torso
-    ctx.beginPath(); ctx.moveTo(0,-20); ctx.lineTo(0,-6); ctx.stroke();
-    // legs (simple gait)
-    const t = (ts/120)%Math.PI;
-    const a = Math.sin(t)*6;
-    ctx.beginPath(); ctx.moveTo(0,-6); ctx.lineTo(8+a,8); ctx.moveTo(0,-6); ctx.lineTo(-8-a,8); ctx.stroke();
-    // arms
-    ctx.beginPath(); ctx.moveTo(0,-16); ctx.lineTo(10-a,-6); ctx.moveTo(0,-16); ctx.lineTo(-10+a,-8); ctx.stroke();
-    ctx.restore();
+  function setSpawner(ms){
+    if (spawner){ clearInterval(spawner); spawner=null; }
+    spawner = setInterval(()=>spawnOne(), ms);
   }
 
-  drawDust();
-}
+  // Start rain in normal mode
+  window.addEventListener('load', ()=> setSpawner(CUR_SPAWN_MS));
 
-function render(ts){
-  ctx.clearRect(0,0,W(),H());
-  drawGrid(ts);
-  drawGround();
+  // Replay = small burst
+  document.getElementById('replay').addEventListener('click', ()=>{
+    for(let i=0;i<10;i++) setTimeout(()=>spawnOne(), i*100);
+  });
 
-  // obstacles
-  for(const o of obstacles){
-    if (o.kind==='hole') drawHole(o);
-    else if (o.kind==='barricade') drawBarricade(o);
-    else drawBeam(o);
+  // ===== Game control =====
+  function startGame(){
+    if (gameActive) return;
+    gameActive = true;
+    score=0; streak=0; misses=0; timeLeft=GAME_TIME; updateHUD();
+
+    CUR_MAX_ACTIVE = GAME_MAX_ACTIVE;
+    CUR_SPAWN_MS   = GAME_SPAWN_MS;
+    CUR_DUR_RANGE  = [...GAME_DUR_RANGE];
+    setSpawner(CUR_SPAWN_MS);
+
+    // difficulty ramp every 10s: slightly quicker
+    diffTimer = setInterval(()=>{
+      CUR_SPAWN_MS = Math.max(360, CUR_SPAWN_MS-60);
+      CUR_DUR_RANGE = [Math.max(6, CUR_DUR_RANGE[0]-1), Math.max(10, CUR_DUR_RANGE[1]-1)];
+      setSpawner(CUR_SPAWN_MS);
+    }, 10000);
+
+    // countdown
+    gameTimer = setInterval(()=>{
+      timeLeft--; updateHUD();
+      if (timeLeft<=0) endGame();
+    }, 1000);
+
+    playBtn.disabled = true; playBtn.textContent = "⏳ Playing…";
   }
 
-  // crane rope when airlift
-  if (PLAYER.airlift){
-    const hx = PLAYER.x + PLAYER.w/2, hy = 40;
-    ctx.strokeStyle='#5aa6ff'; ctx.globalAlpha=.7; ctx.lineWidth=2;
-    ctx.beginPath(); ctx.moveTo(hx,hy); ctx.lineTo(hx, PLAYER.y+8); ctx.stroke();
-    ctx.globalAlpha=1; ctx.font='26px system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji';
-    ctx.fillText('🪝', hx-13, hy+8);
+  function endGame(){
+    gameActive = false;
+    clearInterval(gameTimer); clearInterval(diffTimer);
+    CUR_MAX_ACTIVE = 18; CUR_SPAWN_MS = 950; CUR_DUR_RANGE = [12,20];
+    setSpawner(CUR_SPAWN_MS);
+
+    // best score
+    if (score > best){ best = score; localStorage.setItem('gb_best', String(best)); bestEl.textContent = best; }
+
+    // toast
+    const t = document.getElementById('toast');
+    t.innerHTML = `Game over — <b>${score}</b> pts · Streak <b>${streak}</b> · Misses <b>${misses}</b> · Best <b>${best}</b>`;
+    t.classList.add('show');
+    setTimeout(()=> t.classList.remove('show'), 3000);
+
+    playBtn.disabled = false; playBtn.textContent = "▶️ Play 30s";
+    timeEl.textContent = "—";
   }
 
-  drawRunner(ts);
+  document.getElementById('playBtn').addEventListener('click', startGame);
 
-  if (paused){
-    ctx.save();
-    ctx.fillStyle='rgba(11,18,32,.55)'; ctx.fillRect(0,0,W(),H());
-    ctx.fillStyle='#e2e8f0'; ctx.textAlign='center';
-    ctx.font='700 22px system-ui'; ctx.fillText(gameOver?'Game Over':'Paused', W()/2, H()/2 - 8);
-    ctx.font='14px system-ui';
-    ctx.fillText('Space/↑ Jump • ↓ Duck • H Help • P Pause • R Restart', W()/2, H()/2 + 16);
-    ctx.restore();
+  // Reduced motion
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    clearInterval(spawner);
   }
-}
 
-/* -------------------------------------------------------------
-   Loop
-------------------------------------------------------------- */
-let lastTs=0;
-function tick(ts){
-  if (paused) return;
-  if (!lastTs) lastTs=ts;
-  const dt=(ts-lastTs)/1000; lastTs=ts;
-  update(dt); render(ts); requestAnimationFrame(tick);
-}
-function startLoop(){ if (!paused){ lastTs=performance.now(); requestAnimationFrame(tick); } }
+  /* ====== Google Form direct submit (no email) ====== */
+  const GF_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/formResponse";
+  const GF_FEEDBACK_FIELD = "entry.1175385091";
 
-/* -------------------------------------------------------------
-   Feedback (Google Form direct submit)
-------------------------------------------------------------- */
-const modal=document.getElementById('modal');
-const feedbackBtn=document.getElementById('feedbackBtn');
-const cancelBtn=document.getElementById('cancel');
-const sendBtn=document.getElementById('send');
-const fbText=document.getElementById('fbText');
+  const modal = document.getElementById('modal');
+  const feedbackBtn = document.getElementById('feedbackBtn');
+  const cancelBtn = document.getElementById('cancel');
+  const sendBtn = document.getElementById('send');
+  const fbText = document.getElementById('fbText');
 
-// Your form: https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/viewform?usp=pp_url&entry.1175385091=...
-const GF_ACTION="https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/formResponse";
-const GF_FIELD="entry.1175385091";
+  feedbackBtn.addEventListener('click', () => { modal.classList.add('open'); fbText.focus(); });
+  cancelBtn.addEventListener('click', () => modal.classList.remove('open'));
 
-feedbackBtn.onclick=()=>{ modal.classList.add('open'); fbText.focus(); };
-cancelBtn.onclick=()=> modal.classList.remove('open');
-sendBtn.onclick=()=>{
-  const v=fbText.value.trim();
-  if(!v){ alert("Please write a quick note first."); return; }
-  const form=document.createElement('form'); form.method='POST'; form.action=GF_ACTION; form.target='gform-target';
-  const t=document.createElement('textarea'); t.name=GF_FIELD; t.value=`${v}\n\n— sent from: ${location.href}`;
-  form.appendChild(t); document.body.appendChild(form); form.submit(); document.body.removeChild(form);
-  alert("Thanks! Your feedback was sent ✅"); modal.classList.remove('open'); fbText.value="";
-};
+  sendBtn.addEventListener('click', () => {
+    const message = fbText.value.trim();
+    if (!message){ alert("Please write a quick note first."); return; }
 
-/* -------------------------------------------------------------
-   Wire up pause/resume
-------------------------------------------------------------- */
-function togglePause(){ if (gameOver) return; paused = !paused; if (!paused) startLoop(); }
-playBtn.addEventListener('click', ()=> startLoop());
-pauseBtn.addEventListener('click', ()=> startLoop());
-restartBtn.addEventListener('click', ()=> startLoop());
-document.addEventListener('keydown', ()=> startLoop(), { once:true });
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = GF_ACTION;
+    form.target = 'gform-target';
 
-/* -------------------------------------------------------------
-   Final helpers
-------------------------------------------------------------- */
-function endGame(){
-  gameOver=true; paused=true;
-  if (Math.floor(score) > best){ best=Math.floor(score); localStorage.setItem('runner_best', String(best)); }
-  bestEl.textContent = best;
-  showToast(`Game over — Score <b>${Math.floor(score)}</b> · Best <b>${best}</b>`);
-}
+    const msgInput = document.createElement('textarea');
+    msgInput.name = GF_FEEDBACK_FIELD;
+    msgInput.value = `${message}\n\n— sent from: ${location.href}`;
+    form.appendChild(msgInput);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+
+    alert("Thanks! Your feedback was sent ✅");
+    modal.classList.remove('open');
+    fbText.value = "";
+  });
 </script>
 </body>
 </html>
