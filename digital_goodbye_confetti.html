@@ -3,101 +3,94 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>👷‍♀️ Farewell Runner</title>
+<title>👷‍♀️ Farewell Runner — Irfana</title>
 <style>
   :root{
-    --bg1:#0f172a; --bg2:#1e293b;
-    --card:#0b1220cc; --text:#e2e8f0; --muted:#9fb0c3; --border:#1f2a44; --accent:#30c48d;
+    --text:#e2e8f0; --muted:#9fb0c3; --border:#223148; --card:#0b1220cc; --pill:#0e1728; --accent:#30c48d;
   }
   *{box-sizing:border-box}
   html,body{height:100%;margin:0}
   body{
     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial;
     color:var(--text);
-    display:grid; align-content:start; justify-items:center; gap:12px;
-    background: radial-gradient(1200px 800px at 10% 10%, var(--bg2), var(--bg1));
-    background-size:cover; background-position:center; background-attachment:fixed;
-    overflow:hidden;
-    padding:16px 10px 24px;
+    display:grid; gap:14px; place-items:center; align-content:start;
+    background:#0a1424 center/cover no-repeat fixed;   /* replaced by JS with your image */
+  }
+  /* soft dark overlay so text is readable over photos */
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none;
+    background: radial-gradient(1100px 700px at 12% 10%, rgba(9,14,24,.55), rgba(6,10,18,.85));
+    z-index:-1;
   }
 
   .card{
-    width:min(92vw, 820px);
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:18px; padding:18px 18px 14px;
-    box-shadow:0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+    width:min(92vw, 860px);
+    background:var(--card); border:1px solid var(--border);
+    border-radius:18px; padding:18px 18px 12px;
+    box-shadow:0 22px 48px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.06);
     backdrop-filter: blur(10px);
   }
-  h1{ margin:0 0 6px; font-size:clamp(22px,4.5vw,32px); line-height:1.15 }
-  .msg{ margin:0; color:var(--muted); font-size:clamp(14px,2.5vw,16px) }
+  h1{margin:0 0 6px; font-size:clamp(22px,4.8vw,32px)}
+  .msg{margin:0 0 10px; color:var(--muted); font-size:clamp(14px,2.6vw,16px)}
+  .legend{margin:4px 0 0; font-size:12px; opacity:.9}
 
   .wrap{
-    position:relative;
-    width:min(96vw, 900px);
-    aspect-ratio: 9 / 3;                 /* responsive, ~900x300 */
-    border:1px solid var(--border);
-    border-radius:16px; overflow:hidden;
-    box-shadow:0 20px 50px rgba(0,0,0,.35);
-    background:linear-gradient(#0c1526, #0a1220);
+    position:relative; width:min(96vw, 980px); aspect-ratio: 9/3;
+    border:1px solid var(--border); border-radius:16px; overflow:hidden;
+    background:linear-gradient(#0c1526, #0a1220); box-shadow:0 22px 60px rgba(0,0,0,.42);
   }
+  canvas{width:100%; height:100%; display:block}
 
-  canvas{ width:100%; height:100%; display:block; background:transparent }
+  .hud, .controls{
+    position:absolute; z-index:3; display:flex; gap:8px; flex-wrap:wrap; align-items:center;
+    background:#0b1220bf; border:1px solid var(--border); border-radius:12px; padding:6px 8px; font-size:12px; backdrop-filter:blur(8px)
+  }
+  .hud{left:10px; top:10px}
+  .controls{right:10px; top:10px}
+  .pill{padding:4px 8px; border:1px solid #2b3b52; background:var(--pill); border-radius:10px}
+  .accent{border-color:#2e5a4c}
 
-  /* HUD */
-  .hud{
-    position:absolute; left:10px; top:10px; z-index:2;
-    display:flex; gap:8px; flex-wrap:wrap; align-items:center;
-    background:#0b1220cc; border:1px solid var(--border); border-radius:12px; padding:6px 8px;
-    font-size:12px; backdrop-filter: blur(8px);
-  }
-  .pill{ padding:4px 8px; border:1px solid #2b3b52; border-radius:10px; background:#0e1728 }
-  .accent{ border-color:#2e5a4c }
-  .controls{
-    position:absolute; right:10px; top:10px; z-index:2; display:flex; gap:8px; flex-wrap:wrap;
-    background:#0b1220cc; border:1px solid var(--border); border-radius:12px; padding:6px 8px; font-size:12px; backdrop-filter: blur(8px);
-  }
-  .controls button{
+  .controls button, .row button{
     appearance:none; border:1px solid #334155; background:#0b1220; color:var(--text);
-    padding:8px 10px; border-radius:10px; font-weight:600; cursor:pointer;
+    padding:8px 10px; border-radius:10px; font-weight:600; cursor:pointer
   }
-  .controls button:hover{ border-color:#475569 }
+  .controls button:hover, .row button:hover{border-color:#475569}
 
-  /* Mobile controls */
-  .touch{
-    position:absolute; inset:auto 0 8px 0; z-index:2; display:flex; gap:10px; justify-content:center;
-    pointer-events:none;  /* let canvas receive events; buttons will enable pointer-events */
-  }
-  .touch button{
-    pointer-events:auto;
-    min-width:88px; padding:12px 14px; border-radius:12px;
-    border:1px solid #334155; background:#0b1220cc; color:var(--text); font-weight:700;
-  }
+  .touch{position:absolute; inset:auto 0 10px 0; z-index:3; display:flex; gap:10px; justify-content:center}
+  .touch button{min-width:92px; padding:12px 14px; border-radius:12px; background:#0b1220cc}
 
-  /* Toast */
   .toast{
-    position:absolute; left:50%; bottom:14px; transform:translateX(-50%);
+    position:absolute; left:50%; bottom:12px; transform:translateX(-50%);
     background:#0b1220cc; border:1px solid var(--border); border-radius:12px; padding:8px 12px; font-weight:700;
     box-shadow:0 12px 30px rgba(0,0,0,.35); backdrop-filter: blur(8px);
-    opacity:0; transition:opacity .25s ease, transform .25s ease; z-index:3; pointer-events:none;
+    opacity:0; transition:opacity .25s, transform .25s; pointer-events:none; z-index:4
   }
-  .toast.show{ opacity:1; transform:translateX(-50%) translateY(-6px) }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(-6px)}
 
-  /* Legend strip */
-  .legend{ margin-top:4px; font-size:12px; opacity:.8 }
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+
+  /* Feedback modal */
+  .modal{position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.45); padding:18px}
+  .modal.open{display:flex}
+  .modal-card{width:min(92vw,620px); background:#0b1220; border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:0 24px 60px rgba(0,0,0,.5)}
+  .modal-card h2{margin:0 0 10px; font-size:20px}
+  textarea{width:100%; min-height:140px; background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:12px; padding:10px; font:inherit}
 </style>
 </head>
 <body>
   <div class="card">
     <h1>Thank you, team!</h1>
     <p class="msg">It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead.</p>
-    <p class="legend">Controls: <b>Space/↑ Jump</b>, <b>↓ Duck</b>, <b>H Help</b>, <b>P Pause</b>, <b>R Restart</b>. Catch crane help to fly across big potholes.</p>
+    <div class="row" style="justify-content:space-between; align-items:center">
+      <span class="legend">Controls: <b>Space/↑ Jump</b>, <b>↓ Duck</b>, <b>H Help (crane)</b>, <b>P Pause</b>, <b>R Restart</b>.</span>
+      <button id="feedbackBtn">💬 Leave feedback</button>
+    </div>
   </div>
 
   <div class="wrap" id="wrap">
     <canvas id="game" aria-label="Construction runner game"></canvas>
 
-    <div class="hud" id="hud">
+    <div class="hud">
       <span class="pill">Score: <b id="score">0</b></span>
       <span class="pill">Speed: <b id="speed">1.0x</b></span>
       <span class="pill">Lives: <b id="lives">⛑️⛑️⛑️</b></span>
@@ -120,364 +113,297 @@
     <div class="toast" id="toast"></div>
   </div>
 
+  <!-- Feedback Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-card">
+      <h2>💬 Share your feedback</h2>
+      <textarea id="fbText" placeholder="Write a quick note..."></textarea>
+      <div class="row" style="justify-content:flex-end">
+        <button id="cancel">Cancel</button>
+        <button id="send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden iframe for Google Form POST -->
+  <iframe name="gform-target" style="display:none"></iframe>
+
 <script>
-(() => {
-  /* ---------- Canvas & sizing ---------- */
-  const canvas = document.getElementById('game');
-  const wrap = document.getElementById('wrap');
-  const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1)); // cap DPR to keep perf
-  function resize(){
-    const w = wrap.clientWidth, h = wrap.clientHeight;
-    canvas.width  = Math.floor(w * dpr);
-    canvas.height = Math.floor(h * dpr);
-    canvas.style.width = w + "px";
-    canvas.style.height= h + "px";
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+/* ---------- Background image (your 1.jpeg or ?bg=) ---------- */
+{
+  const qs = new URLSearchParams(location.search);
+  const bg = qs.get('bg') || "1.jpeg";
+  const url = /^https?:\/\//.test(bg) ? bg : bg;
+  document.body.style.backgroundImage = `url('${url}')`;
+}
+
+/* ---------- Canvas setup ---------- */
+const canvas = document.getElementById('game');
+const wrap = document.getElementById('wrap');
+const ctx = canvas.getContext('2d', { alpha:true });
+
+function resize(){
+  const dpr = Math.max(1, Math.min(2, window.devicePixelRatio||1));
+  const w = wrap.clientWidth, h = wrap.clientHeight;
+  canvas.width = Math.floor(w*dpr); canvas.height = Math.floor(h*dpr);
+  canvas.style.width = w+"px"; canvas.style.height = h+"px";
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+resize(); addEventListener('resize', resize);
+
+/* ---------- HUD refs ---------- */
+const scoreEl = document.getElementById('score');
+const speedEl = document.getElementById('speed');
+const livesEl = document.getElementById('lives');
+const bestEl  = document.getElementById('best');
+const toast   = document.getElementById('toast');
+
+/* ---------- Controls ---------- */
+const playBtn = document.getElementById('playBtn');
+const pauseBtn= document.getElementById('pauseBtn');
+const restartBtn=document.getElementById('restartBtn');
+const helpBtn  = document.getElementById('helpBtn');
+const jumpT    = document.getElementById('jumpT');
+const duckT    = document.getElementById('duckT');
+const helpT    = document.getElementById('helpT');
+
+function showToast(t){ toast.innerHTML=t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 2000); }
+
+/* ---------- Game constants ---------- */
+const H = ()=> wrap.clientHeight, W = ()=> wrap.clientWidth;
+const GROUND = ()=> H()-46;
+
+const PLAYER = {
+  // Facing right (toward obstacles)
+  x: 126, y: 0, w: 38, h: 46,
+  vy: 0, onGround: true, duck:false,
+  charRun:"👷‍♀️",          // civil engineer hard-hat
+  charDuck:"🧎‍♀️",         // duck pose (no hat, acceptable)
+  charAir:"👷‍♀️",          // in-air, bob with rope if airlift
+  airlift:false, airTimer:0
+};
+
+const GRAVITY = 1600, JUMP_V = -640, DUCK_H = 32;
+const MAX_LIVES = 3;
+const START_SPEED = 360, MAX_SPEED = 720;
+
+const SPAWN_BASE = 1050, SPAWN_VAR = 600;
+
+/* Obstacles */
+function makeObstacle(){
+  const r = Math.random();
+  if (r < 0.5) return {kind:'barricade', w:42, h:38, emoji:'🚧', y:GROUND()-38};
+  if (r < 0.8) return {kind:'beam', w:74, h:24, emoji:'🏗️', y:GROUND()-110};
+  const width = 120 + Math.random()*90;
+  return {kind:'hole', w:width, h:20, emoji:'🕳️', y:GROUND()};
+}
+
+/* ---------- State ---------- */
+let best = Number(localStorage.getItem('runner_best')||0); bestEl.textContent = best;
+let lives, score, speed, paused, gameOver, obstacles, lastSpawn, spawnDelay, lastTime;
+let helpCharges, helpCooldown;
+
+function reset(){
+  lives=MAX_LIVES; score=0; speed=START_SPEED; paused=true; gameOver=false;
+  obstacles=[]; lastSpawn=0; spawnDelay=SPAWN_BASE; helpCharges=2; helpCooldown=0;
+  PLAYER.y = GROUND()-PLAYER.h; PLAYER.vy=0; PLAYER.onGround=true; PLAYER.duck=false; PLAYER.airlift=false; PLAYER.airTimer=0;
+  render(0); updateUI();
+}
+reset();
+
+/* ---------- UI ---------- */
+function updateUI(){
+  scoreEl.textContent = Math.floor(score);
+  livesEl.textContent = "⛑️".repeat(lives) || "—";
+  speedEl.textContent = (speed/START_SPEED).toFixed(1)+"x";
+  helpBtn.textContent = `🆘 Help (Crane) ${helpCharges>0 ? `· ${helpCharges}` : helpCooldown>0 ? `· cooldown` : ''}`;
+}
+
+/* ---------- Input ---------- */
+function jump(){ if (!paused && !gameOver && PLAYER.onGround && !PLAYER.airlift){ PLAYER.vy=JUMP_V; PLAYER.onGround=false; } }
+function setDuck(on){ if (!paused && !gameOver && PLAYER.onGround && !PLAYER.airlift){ PLAYER.duck=on; } }
+function tryHelp(){
+  if (paused||gameOver) return;
+  if (helpCharges<=0 || helpCooldown>0 || PLAYER.airlift) return;
+  PLAYER.airlift=true; PLAYER.airTimer=1100; helpCharges--; helpCooldown=3500; showToast("🪝 Crane lifting…");
+}
+
+document.addEventListener('keydown', e=>{
+  if (e.code==='Space' || e.code==='ArrowUp'){ e.preventDefault(); jump(); }
+  if (e.code==='ArrowDown'){ e.preventDefault(); setDuck(true); }
+  if (e.key==='h' || e.key==='H'){ tryHelp(); }
+  if (e.key==='p' || e.key==='P'){ togglePause(); }
+  if (e.key==='r' || e.key==='R'){ reset(); paused=false; startLoop(); }
+});
+document.addEventListener('keyup', e=>{ if (e.code==='ArrowDown'){ setDuck(false); } });
+jumpT.onclick = jump; duckT.onpointerdown=()=>setDuck(true); duckT.onpointerup=()=>setDuck(false); helpT.onclick=tryHelp;
+
+playBtn.onclick = ()=>{ if (gameOver) reset(); paused=false; startLoop(); };
+pauseBtn.onclick= ()=> togglePause();
+restartBtn.onclick=()=>{ reset(); paused=false; startLoop(); };
+helpBtn.onclick = tryHelp;
+
+function togglePause(){ if (gameOver) return; paused = !paused; if (!paused) startLoop(); }
+
+/* ---------- Update/render ---------- */
+function rectsOverlap(ax,ay,aw,ah,bx,by,bw,bh){ return ax<bx+bw && ax+aw>bx && ay<by+bh && ay+ah>by; }
+
+function spawnIfNeeded(ms){
+  lastSpawn += ms;
+  if (lastSpawn >= spawnDelay){
+    lastSpawn=0;
+    const last = obstacles[obstacles.length-1];
+    const o = makeObstacle();
+    if (last && last.kind==='hole' && o.kind==='hole'){ o.kind='barricade'; o.w=42; o.h=38; o.y=GROUND()-38; o.emoji='🚧'; }
+    o.x = W()+20; obstacles.push(o);
+    spawnDelay = SPAWN_BASE - Math.min(500, (speed-START_SPEED)*0.8) + Math.random()*SPAWN_VAR;
   }
-  const ctx = canvas.getContext('2d');
-  resize(); window.addEventListener('resize', resize);
+}
 
-  /* ---------- UI elements ---------- */
-  const scoreEl = document.getElementById('score');
-  const speedEl = document.getElementById('speed');
-  const livesEl = document.getElementById('lives');
-  const bestEl  = document.getElementById('best');
-  const toast   = document.getElementById('toast');
+function update(dt){
+  speed = Math.min(MAX_SPEED, speed + dt*8);
+  score += dt * (speed/40);
+  if (helpCooldown>0) helpCooldown = Math.max(0, helpCooldown - dt*1000);
 
-  const playBtn = document.getElementById('playBtn');
-  const pauseBtn= document.getElementById('pauseBtn');
-  const restartBtn = document.getElementById('restartBtn');
-  const helpBtn = document.getElementById('helpBtn');
-  const jumpT = document.getElementById('jumpT');
-  const duckT = document.getElementById('duckT');
-  const helpT = document.getElementById('helpT');
-
-  function showToast(html){ toast.innerHTML = html; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 2200); }
-
-  /* ---------- Game constants ---------- */
-  const H = () => wrap.clientHeight;
-  const W = () => wrap.clientWidth;
-  const GROUND_Y = () => H() - 48;
-  const PLAYER = {
-    x: 120, y: 0, w: 38, h: 46,
-    vy: 0, onGround: true, duck: false,
-    charRun: "🏃‍♀️", charDuck:"🧎‍♀️", charAir:"🤸‍♀️",
-    airlift: false, airTimer: 0
-  };
-
-  const GRAVITY = 1600;         // px/s^2
-  const JUMP_V  = -640;         // initial jump velocity (px/s)
-  const DUCK_H  = 30;           // ducking height
-  const MAX_LIVES = 3;
-  const START_SPEED = 360;      // world scroll speed px/s
-  const MAX_SPEED   = 720;
-
-  const SPAWN_BASE = 1050;      // ms base between spawns
-  const SPAWN_VAR  = 600;       // add randomness
-
-  /* Obstacles:
-     type: 'barricade' (jump), 'beam' (duck), 'hole' (needs jump OR HELP)
-  */
-  function makeObstacle(){
-    const r = Math.random();
-    if (r < 0.5) return {kind:'barricade', w: 40, h: 38, emoji:'🚧', y: GROUND_Y()-38};
-    if (r < 0.78) return {kind:'beam', w: 70, h: 24, emoji:'🏗️', y: GROUND_Y()-110};
-    // hole: render as pit, collision if feet at/under ground inside x span
-    const width = 120 + Math.random()*80;
-    return {kind:'hole', w: width, h: 20, emoji:'🕳️', y: GROUND_Y()};
+  if (PLAYER.airlift){
+    PLAYER.airTimer -= dt*1000;
+    const lift = 120;
+    PLAYER.y = GROUND() - PLAYER.h - lift;
+    if (PLAYER.airTimer<=0){ PLAYER.airlift=false; PLAYER.onGround=false; showToast("✅ Safe across"); }
+  }else{
+    // height for duck
+    const targetH = PLAYER.duck? DUCK_H : 46;
+    if (PLAYER.h !== targetH){ PLAYER.h = targetH; if (PLAYER.onGround) PLAYER.y = GROUND()-PLAYER.h; }
+    // gravity
+    PLAYER.vy += GRAVITY*dt; PLAYER.y += PLAYER.vy*dt;
+    const gy = GROUND()-PLAYER.h;
+    if (PLAYER.y >= gy){ PLAYER.y=gy; PLAYER.vy=0; PLAYER.onGround=true; }
   }
 
-  /* ---------- State ---------- */
-  let best = Number(localStorage.getItem('runner_best')||0); bestEl.textContent = best;
-  let lives = MAX_LIVES;
-  let score = 0;
-  let speed = START_SPEED;
-  let paused = true;
-  let gameOver = false;
+  for (const o of obstacles) o.x -= speed*dt;
+  obstacles = obstacles.filter(o=> o.x + o.w > -40);
 
-  let obstacles = [];
-  let lastSpawn = 0;
-  let spawnDelay = SPAWN_BASE;
+  spawnIfNeeded(dt*1000);
 
-  let lastTime = 0;
-
-  let helpCharges = 2;      // total uses
-  let helpCooldown = 0;     // ms cooldown timer
-
-  /* ---------- Helpers ---------- */
-  function reset(){
-    lives = MAX_LIVES; score = 0; speed = START_SPEED;
-    obstacles.length = 0; lastSpawn = 0; spawnDelay = SPAWN_BASE;
-    paused = true; gameOver = false; helpCharges = 2; helpCooldown = 0;
-    PLAYER.y = GROUND_Y() - PLAYER.h; PLAYER.vy = 0; PLAYER.onGround = true; PLAYER.duck = false; PLAYER.airlift = false; PLAYER.airTimer = 0;
-    render(0); updateUI();
-  }
-  function updateUI(){
-    scoreEl.textContent = Math.floor(score);
-    const hats = "⛑️".repeat(lives) || "—";
-    livesEl.textContent = hats;
-    speedEl.textContent = (speed/START_SPEED).toFixed(1)+"x";
-    helpBtn.textContent = `🆘 Help (Crane) ${helpCharges>0 ? `· ${helpCharges}` : helpCooldown>0 ? `· cooldown` : ''}`;
-  }
-
-  function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
-  function rnd(min,max){ return Math.random()*(max-min)+min; }
-
-  function spawnIfNeeded(dt){
-    lastSpawn += dt;
-    if (lastSpawn >= spawnDelay){
-      lastSpawn = 0;
-      // do not spawn impossible combos immediately after hole
-      const last = obstacles[obstacles.length-1];
-      const o = makeObstacle();
-      if (last && last.kind==='hole' && o.kind==='hole'){ o.kind='barricade'; o.w=40; o.h=38; o.emoji='🚧'; o.y=GROUND_Y()-38; }
-      o.x = W() + 20;
-      obstacles.push(o);
-      spawnDelay = SPAWN_BASE - clamp((speed-START_SPEED)*0.8, 0, 500) + rnd(0, SPAWN_VAR);
+  // collisions
+  for (const o of obstacles){
+    if (o.kind==='hole'){
+      const center = PLAYER.x + PLAYER.w/2;
+      const inHole = center>o.x && center<o.x+o.w;
+      const feetGround = PLAYER.y + PLAYER.h >= GROUND()-2;
+      if (!PLAYER.airlift && inHole && feetGround){ loseLife(); break; }
+    }else if (o.kind==='barricade'){
+      if (rectsOverlap(PLAYER.x,PLAYER.y,PLAYER.w,PLAYER.h, o.x,o.y,o.w,o.h)){ loseLife(); break; }
+    }else if (o.kind==='beam'){
+      if (rectsOverlap(PLAYER.x,PLAYER.y,PLAYER.w,PLAYER.h, o.x,o.y,o.w,o.h) && !PLAYER.duck){ loseLife(); break; }
     }
   }
 
-  function rectsOverlap(ax,ay,aw,ah, bx,by,bw,bh){
-    return ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by;
+  updateUI();
+}
+
+function loseLife(){
+  lives--; showToast(lives>0? "💥 Ouch! −1 life" : "💥 Out of lives");
+  PLAYER.y=GROUND()-PLAYER.h; PLAYER.vy=0; PLAYER.onGround=true; PLAYER.duck=false; PLAYER.airlift=false; PLAYER.airTimer=0;
+  obstacles = obstacles.filter(o=> o.x > PLAYER.x + 42);
+  if (lives<=0) endGame();
+}
+
+function endGame(){
+  gameOver=true; paused=true;
+  if (Math.floor(score) > best){ best=Math.floor(score); localStorage.setItem('runner_best', String(best)); }
+  bestEl.textContent = best;
+  showToast(`Game over — Score <b>${Math.floor(score)}</b> · Best <b>${best}</b>`);
+}
+
+function render(ts){
+  const w=W(), h=H(); ctx.clearRect(0,0,w,h);
+
+  // subtle grid
+  ctx.save(); ctx.globalAlpha=.06; ctx.strokeStyle='#8ab3ff'; ctx.lineWidth=1;
+  const step=24, xoff=(ts/80)%step;
+  for(let x=xoff; x<w; x+=step){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for(let y=0; y<h; y+=step){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+  ctx.restore();
+
+  // ground
+  ctx.strokeStyle = '#2a3b55'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(0,GROUND()+.5); ctx.lineTo(w,GROUND()+.5); ctx.stroke();
+
+  // holes
+  for(const o of obstacles){ if (o.kind==='hole'){
+    ctx.save(); ctx.fillStyle='#07101f'; ctx.fillRect(o.x, o.y, o.w, 30);
+    ctx.globalAlpha=.8; ctx.font='20px system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji';
+    ctx.fillText('🕳️', o.x + o.w/2 - 10, o.y + 20); ctx.restore();
+  }}
+
+  // barricades & beams
+  ctx.font='32px system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji';
+  for(const o of obstacles){
+    if (o.kind!=='hole'){ ctx.fillText(o.emoji, o.x, o.y + o.h); }
   }
 
-  /* ---------- Input ---------- */
-  function jump(){
-    if (gameOver || paused) return;
-    if (PLAYER.onGround && !PLAYER.airlift){
-      PLAYER.vy = JUMP_V;
-      PLAYER.onGround = false;
-    }
+  // player (face RIGHT): draw emoji normally (most fonts face forward). Add crane rope when airlift.
+  if (PLAYER.airlift){
+    const hx = PLAYER.x + PLAYER.w/2, hy = 38;
+    ctx.strokeStyle='#5aa6ff'; ctx.globalAlpha=.7; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(hx,hy); ctx.lineTo(hx, PLAYER.y+6); ctx.stroke();
+    ctx.globalAlpha=1; ctx.font='28px system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji';
+    ctx.fillText('🪝', hx-14, hy+8);
   }
-  function setDuck(on){
-    if (gameOver || paused) return;
-    PLAYER.duck = on && PLAYER.onGround && !PLAYER.airlift;
-  }
-  function tryHelp(){
-    if (gameOver || paused) return;
-    if (helpCharges<=0 || helpCooldown>0 || PLAYER.airlift) return;
-    // Only useful if a hole is near (but allow anytime)
-    PLAYER.airlift = true;
-    PLAYER.airTimer = 1100; // ms
-    helpCharges--;
-    helpCooldown = 3500; // ms
-    showToast("🪝 Crane lifting…");
-  }
+  const char = PLAYER.onGround ? (PLAYER.duck? '🧎‍♀️' : '👷‍♀️') : '👷‍♀️';
+  ctx.font = (PLAYER.duck? '34px':'36px') + ' system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji';
+  ctx.fillText(char, PLAYER.x, PLAYER.y + PLAYER.h);
 
-  document.addEventListener('keydown', e=>{
-    if (e.code==='Space' || e.code==='ArrowUp'){ e.preventDefault(); jump(); }
-    if (e.code==='ArrowDown'){ e.preventDefault(); setDuck(true); }
-    if (e.key==='h' || e.key==='H'){ tryHelp(); }
-    if (e.key==='p' || e.key==='P'){ togglePause(); }
-    if (e.key==='r' || e.key==='R'){ reset(); paused=false; }
-  });
-  document.addEventListener('keyup', e=>{
-    if (e.code==='ArrowDown'){ setDuck(false); }
-  });
-
-  // Touch buttons
-  jumpT.onclick = jump;
-  duckT.onpointerdown = ()=> setDuck(true);
-  duckT.onpointerup   = ()=> setDuck(false);
-  helpT.onclick = tryHelp;
-
-  playBtn.onclick = ()=>{ if (gameOver) reset(); paused=false; };
-  pauseBtn.onclick= ()=> togglePause();
-  restartBtn.onclick=()=>{ reset(); paused=false; };
-  helpBtn.onclick = tryHelp;
-
-  function togglePause(){ if (gameOver) return; paused = !paused; if (!paused){ lastTime = performance.now(); requestAnimationFrame(tick); } }
-
-  /* ---------- Update ---------- */
-  function tick(ts){
-    if (paused) return;
-    if (!lastTime) lastTime = ts;
-    const dt = (ts - lastTime); // ms
-    lastTime = ts;
-
-    update(dt/1000);
-    render(ts);
-    requestAnimationFrame(tick);
-  }
-
-  function update(dt){
-    // speed ramp
-    speed = clamp(speed + dt*8, START_SPEED, MAX_SPEED);
-    score += dt* (speed/40);
-
-    // cooldowns & timers
-    if (helpCooldown>0){ helpCooldown = Math.max(0, helpCooldown - dt*1000); }
-    if (PLAYER.airlift){
-      PLAYER.airTimer -= dt*1000;
-      // lift up and carry forward visually (we’ll just hold player and move world)
-      const liftY = 120; // pixels above ground
-      PLAYER.y = GROUND_Y() - PLAYER.h - liftY;
-      if (PLAYER.airTimer <= 0){
-        PLAYER.airlift = false;
-        PLAYER.onGround = false; // drop back, will land
-        showToast("✅ Safe across");
-      }
-    } else {
-      // gravity & duck
-      const targetH = PLAYER.duck ? DUCK_H : 46;
-      if (PLAYER.h !== targetH){
-        // smooth-ish snap
-        PLAYER.h = targetH;
-        if (PLAYER.onGround) PLAYER.y = GROUND_Y() - PLAYER.h;
-      }
-
-      // apply gravity
-      PLAYER.vy += GRAVITY * dt;
-      PLAYER.y  += PLAYER.vy * dt;
-
-      // ground collision
-      const gy = GROUND_Y() - PLAYER.h;
-      if (PLAYER.y >= gy){
-        PLAYER.y = gy; PLAYER.vy = 0; PLAYER.onGround = true;
-      }
-    }
-
-    // move obstacles
-    for (const o of obstacles){
-      o.x -= speed * dt;
-    }
-    // remove off-screen
-    obstacles = obstacles.filter(o => o.x + o.w > -40);
-
-    // spawn new
-    spawnIfNeeded(dt*1000);
-
-    // collisions
-    for (const o of obstacles){
-      if (o.kind === 'hole'){
-        // Check if player is over hole at ground level and not airlifted
-        const pxCenter = PLAYER.x + PLAYER.w/2;
-        const inHole = pxCenter > o.x && pxCenter < o.x + o.w;
-        const feetAtGround = PLAYER.y + PLAYER.h >= GROUND_Y() - 2;
-        if (!PLAYER.airlift && inHole && feetAtGround){
-          loseLife();
-          break;
-        }
-      } else if (o.kind === 'barricade'){
-        const hit = rectsOverlap(PLAYER.x, PLAYER.y, PLAYER.w, PLAYER.h, o.x, o.y, o.w, o.h);
-        if (hit){ loseLife(); break; }
-      } else if (o.kind === 'beam'){
-        // only hits if not ducking and y overlaps beam
-        const hit = rectsOverlap(PLAYER.x, PLAYER.y, PLAYER.w, PLAYER.h, o.x, o.y, o.w, o.h) && !PLAYER.duck;
-        if (hit){ loseLife(); break; }
-      }
-    }
-
-    // update UI
-    updateUI();
-  }
-
-  function loseLife(){
-    lives--;
-    showToast(lives>0 ? "💥 Ouch! −1 life" : "💥 Out of lives");
-    // brief invuln/reset position
-    PLAYER.y = GROUND_Y() - PLAYER.h; PLAYER.vy = 0; PLAYER.onGround = true; PLAYER.duck = false; PLAYER.airlift=false; PLAYER.airTimer=0;
-    // clear near obstacles to prevent instant repeat
-    obstacles = obstacles.filter(o => o.x > PLAYER.x + 40);
-    if (lives <= 0){
-      endGame();
-    }
-  }
-
-  function endGame(){
-    gameOver = true; paused = true;
-    if (Math.floor(score) > best){ best = Math.floor(score); localStorage.setItem('runner_best', String(best)); }
-    bestEl.textContent = best;
-    showToast(`Game over — Score <b>${Math.floor(score)}</b> · Best <b>${best}</b>`);
-  }
-
-  /* ---------- Render ---------- */
-  function render(ts){
-    const w = W(), h = H();
-    ctx.clearRect(0,0,w,h);
-
-    // background gridlines (very subtle)
+  if (paused){
     ctx.save();
-    ctx.globalAlpha = 0.06;
-    ctx.strokeStyle = '#8ab3ff';
-    ctx.lineWidth = 1;
-    const step = 24;
-    for (let x= (ts/80)%step; x < w; x+=step){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
-    for (let y= 0; y < h; y+=step){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+    ctx.fillStyle='rgba(11,18,32,.55)'; ctx.fillRect(0,0,w,h);
+    ctx.fillStyle='#e2e8f0'; ctx.textAlign='center';
+    ctx.font='700 22px system-ui'; ctx.fillText(gameOver?'Game Over':'Paused', w/2, h/2 - 8);
+    ctx.font='14px system-ui';
+    ctx.fillText('Space/↑ Jump • ↓ Duck • H Help • P Pause • R Restart', w/2, h/2 + 16);
     ctx.restore();
-
-    // ground
-    ctx.strokeStyle = '#2a3b55'; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(0, GROUND_Y()+0.5); ctx.lineTo(w, GROUND_Y()+0.5); ctx.stroke();
-
-    // draw potholes (as gaps + emoji label)
-    for (const o of obstacles){
-      if (o.kind === 'hole'){
-        ctx.save();
-        ctx.fillStyle = '#07101f';
-        ctx.fillRect(o.x, o.y, o.w, 30);
-        ctx.globalAlpha = 0.7;
-        ctx.font = '20px system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji';
-        ctx.fillText('🕳️', o.x + o.w/2 - 10, o.y + 22);
-        ctx.restore();
-      }
-    }
-
-    // draw obstacles (barricade / beam)
-    ctx.font = '32px system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji';
-    for (const o of obstacles){
-      if (o.kind === 'barricade'){
-        ctx.fillText(o.emoji, o.x, o.y + o.h);
-      } else if (o.kind === 'beam'){
-        ctx.fillText(o.emoji, o.x, o.y + o.h);
-      }
-    }
-
-    // player (with crane airlift)
-    ctx.save();
-    if (PLAYER.airlift){
-      // rope + hook
-      const hookX = PLAYER.x + PLAYER.w/2, hookY = 40;
-      ctx.strokeStyle = '#5aa6ff'; ctx.lineWidth = 2; ctx.globalAlpha=0.7;
-      ctx.beginPath(); ctx.moveTo(hookX, hookY); ctx.lineTo(hookX, PLAYER.y + 6); ctx.stroke();
-      ctx.globalAlpha=1; ctx.font='28px system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji';
-      ctx.fillText('🪝', hookX-14, hookY+8);
-    }
-    // character
-    ctx.font = (PLAYER.duck ? '34px' : '36px') + ' system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji';
-    const char = PLAYER.onGround ? (PLAYER.duck ? PLAYER.charDuck : PLAYER.charRun) : PLAYER.charAir;
-    ctx.fillText(char, PLAYER.x, PLAYER.y + PLAYER.h);
-    ctx.restore();
-
-    // overlay when paused/game over
-    if (paused){
-      ctx.save();
-      ctx.fillStyle = 'rgba(11,18,32,.55)';
-      ctx.fillRect(0,0,w,h);
-      ctx.fillStyle = '#e2e8f0';
-      ctx.font = '700 22px system-ui, -apple-system';
-      ctx.textAlign = 'center';
-      ctx.fillText(gameOver ? 'Game Over' : 'Paused', w/2, h/2 - 10);
-      ctx.font = '14px system-ui, -apple-system';
-      ctx.fillText('Space/↑ Jump • ↓ Duck • H Help • P Pause • R Restart', w/2, h/2 + 16);
-      ctx.restore();
-    }
   }
+}
 
-  /* ---------- Boot ---------- */
-  reset();
-  // Auto-run when clicking Play
-  playBtn.focus();
-  // Start loop when unpaused
-  const startLoop = () => { if (!paused){ lastTime = performance.now(); requestAnimationFrame(tick); } };
-  const origPlay = playBtn.onclick;
-  playBtn.onclick = () => { origPlay(); startLoop(); };
-  pauseBtn.onclick = () => { togglePause(); startLoop(); };
-  restartBtn.onclick = () => { reset(); paused=false; startLoop(); };
-  helpBtn.onclick = () => { tryHelp(); };
-  // Start loop if user presses any gameplay key
-  document.addEventListener('keydown', () => startLoop(), { once:true });
-})();
+function tick(ts){
+  if (paused) return;
+  if (!lastTime) lastTime=ts;
+  const dt=(ts-lastTime)/1000; lastTime=ts;
+  update(dt); render(ts); requestAnimationFrame(tick);
+}
+function startLoop(){ if (!paused){ lastTime=performance.now(); requestAnimationFrame(tick); } }
+
+/* ---------- Boot ---------- */
+render(0);
+
+/* ---------- Feedback (Google Form direct submit) ---------- */
+const modal=document.getElementById('modal');
+const feedbackBtn=document.getElementById('feedbackBtn');
+const cancelBtn=document.getElementById('cancel');
+const sendBtn=document.getElementById('send');
+const fbText=document.getElementById('fbText');
+
+// Your form: https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/viewform?usp=pp_url&entry.1175385091=...
+const GF_ACTION="https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/formResponse";
+const GF_FIELD="entry.1175385091";
+
+feedbackBtn.onclick=()=>{ modal.classList.add('open'); fbText.focus(); };
+cancelBtn.onclick=()=> modal.classList.remove('open');
+sendBtn.onclick=()=>{
+  const v=fbText.value.trim();
+  if(!v){ alert("Please write a quick note first."); return; }
+  const form=document.createElement('form'); form.method='POST'; form.action=GF_ACTION; form.target='gform-target';
+  const t=document.createElement('textarea'); t.name=GF_FIELD; t.value=`${v}\n\n— sent from: ${location.href}`;
+  form.appendChild(t); document.body.appendChild(form); form.submit(); document.body.removeChild(form);
+  alert("Thanks! Your feedback was sent ✅"); modal.classList.remove('open'); fbText.value="";
+};
+
+/* ---------- start/pause/restart hooks ---------- */
+playBtn.addEventListener('click', ()=> startLoop());
+pauseBtn.addEventListener('click', ()=> startLoop());
+restartBtn.addEventListener('click', ()=> startLoop());
+document.addEventListener('keydown', ()=> startLoop(), { once:true });
 </script>
 </body>
 </html>
