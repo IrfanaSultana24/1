@@ -6,7 +6,7 @@
 <title>👷‍♀️ Farewell Runner — Irfana</title>
 <style>
   :root{
-    --text:#e2e8f0; --muted:#9fb0c3; --border:#223148; --card:#0b1220cc; --pill:#0e1728; --accent:#30c48d;
+    --text:#e2e8f0; --muted:#9fb0c3; --border:#223148; --card:#0b1220cc; --pill:#0e1728;
   }
   *{box-sizing:border-box}
   html,body{height:100%;margin:0}
@@ -14,17 +14,16 @@
     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial;
     color:var(--text);
     display:grid; gap:14px; place-items:center; align-content:start;
-    background:#0a1424 center/cover no-repeat fixed;   /* replaced by JS with your image */
+    background:#0a1424 center/cover no-repeat fixed;   /* replaced with your photo by JS */
   }
-  /* soft dark overlay so text is readable over photos */
+  /* dark soft overlay so text stays readable over photos */
   body::before{
-    content:""; position:fixed; inset:0; pointer-events:none;
-    background: radial-gradient(1100px 700px at 12% 10%, rgba(9,14,24,.55), rgba(6,10,18,.85));
-    z-index:-1;
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:-1;
+    background: radial-gradient(1100px 700px at 12% 10%, rgba(9,14,24,.55), rgba(6,10,18,.86));
   }
 
   .card{
-    width:min(92vw, 860px);
+    width:min(92vw, 900px);
     background:var(--card); border:1px solid var(--border);
     border-radius:18px; padding:18px 18px 12px;
     box-shadow:0 22px 48px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.06);
@@ -32,12 +31,13 @@
   }
   h1{margin:0 0 6px; font-size:clamp(22px,4.8vw,32px)}
   .msg{margin:0 0 10px; color:var(--muted); font-size:clamp(14px,2.6vw,16px)}
-  .legend{margin:4px 0 0; font-size:12px; opacity:.9}
+  .legend{margin:2px 0 0; font-size:12px; opacity:.9}
 
   .wrap{
     position:relative; width:min(96vw, 980px); aspect-ratio: 9/3;
     border:1px solid var(--border); border-radius:16px; overflow:hidden;
-    background:linear-gradient(#0c1526, #0a1220); box-shadow:0 22px 60px rgba(0,0,0,.42);
+    background:linear-gradient(#0c1526, #0a1220);
+    box-shadow:0 22px 60px rgba(0,0,0,.42);
   }
   canvas{width:100%; height:100%; display:block}
 
@@ -79,10 +79,12 @@
 </head>
 <body>
   <div class="card">
-    <h1>Thank you, team!</h1>
-    <p class="msg">It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead.</p>
-    <div class="row" style="justify-content:space-between; align-items:center">
-      <span class="legend">Controls: <b>Space/↑ Jump</b>, <b>↓ Duck</b>, <b>H Help (crane)</b>, <b>P Pause</b>, <b>R Restart</b>.</span>
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+      <div>
+        <h1>Thank you, team!</h1>
+        <p class="msg">It’s been a privilege to build, iterate, and ship with you. Wishing you smooth workflows and zero clashes ahead.</p>
+        <p class="legend">Controls: <b>Space/↑ Jump</b>, <b>↓ Duck</b>, <b>H Help (crane)</b>, <b>P Pause</b>, <b>R Restart</b>.</p>
+      </div>
       <button id="feedbackBtn">💬 Leave feedback</button>
     </div>
   </div>
@@ -129,7 +131,9 @@
   <iframe name="gform-target" style="display:none"></iframe>
 
 <script>
-/* ---------- Background image (your 1.jpeg or ?bg=) ---------- */
+/* -------------------------------------------------------------
+   Background image (your 1.jpeg or ?bg=...)
+------------------------------------------------------------- */
 {
   const qs = new URLSearchParams(location.search);
   const bg = qs.get('bg') || "1.jpeg";
@@ -137,7 +141,9 @@
   document.body.style.backgroundImage = `url('${url}')`;
 }
 
-/* ---------- Canvas setup ---------- */
+/* -------------------------------------------------------------
+   Canvas & HUD
+------------------------------------------------------------- */
 const canvas = document.getElementById('game');
 const wrap = document.getElementById('wrap');
 const ctx = canvas.getContext('2d', { alpha:true });
@@ -151,14 +157,16 @@ function resize(){
 }
 resize(); addEventListener('resize', resize);
 
-/* ---------- HUD refs ---------- */
 const scoreEl = document.getElementById('score');
 const speedEl = document.getElementById('speed');
 const livesEl = document.getElementById('lives');
 const bestEl  = document.getElementById('best');
 const toast   = document.getElementById('toast');
+function showToast(t){ toast.innerHTML=t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 2000); }
 
-/* ---------- Controls ---------- */
+/* -------------------------------------------------------------
+   Controls
+------------------------------------------------------------- */
 const playBtn = document.getElementById('playBtn');
 const pauseBtn= document.getElementById('pauseBtn');
 const restartBtn=document.getElementById('restartBtn');
@@ -167,51 +175,67 @@ const jumpT    = document.getElementById('jumpT');
 const duckT    = document.getElementById('duckT');
 const helpT    = document.getElementById('helpT');
 
-function showToast(t){ toast.innerHTML=t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 2000); }
+/* -------------------------------------------------------------
+   Runner sprite / fallback vector
+------------------------------------------------------------- */
+const SPRITE_CONFIG = {
+  src: "worker_run.png",  // PLACE THIS PNG IN YOUR REPO (8 frames, 1 row)
+  cols: 8, rows: 1,
+  frameW: 128, frameH: 128,    // change if your sheet uses different frame size
+  scale: 0.66                  // overall on-canvas scale
+};
+const runnerImg = new Image();
+let spriteLoaded = false;
+runnerImg.onload = ()=> spriteLoaded = true;
+runnerImg.onerror = ()=> spriteLoaded = false;
+runnerImg.src = SPRITE_CONFIG.src;
 
-/* ---------- Game constants ---------- */
+/* -------------------------------------------------------------
+   Game constants
+------------------------------------------------------------- */
 const H = ()=> wrap.clientHeight, W = ()=> wrap.clientWidth;
-const GROUND = ()=> H()-46;
+const GROUND = ()=> H()-50;
 
 const PLAYER = {
-  // Facing right (toward obstacles)
-  x: 126, y: 0, w: 38, h: 46,
-  vy: 0, onGround: true, duck:false,
-  charRun:"👷‍♀️",          // civil engineer hard-hat
-  charDuck:"🧎‍♀️",         // duck pose (no hat, acceptable)
-  charAir:"👷‍♀️",          // in-air, bob with rope if airlift
-  airlift:false, airTimer:0
+  x: 120, y: 0, w: 46, h: 56,    // visible bounds (slightly bigger)
+  vy: 0, onGround:true, duck:false,
+  airlift:false, airTimer:0,
+  frame:0, frameTime:0           // sprite animation
 };
 
-const GRAVITY = 1600, JUMP_V = -640, DUCK_H = 32;
+const GRAVITY = 1600, JUMP_V = -640, DUCK_H = 38;
 const MAX_LIVES = 3;
-const START_SPEED = 360, MAX_SPEED = 720;
-
+const START_SPEED = 360, MAX_SPEED = 760;
 const SPAWN_BASE = 1050, SPAWN_VAR = 600;
 
-/* Obstacles */
+/* Obstacles in vector style (no emoji) */
 function makeObstacle(){
   const r = Math.random();
-  if (r < 0.5) return {kind:'barricade', w:42, h:38, emoji:'🚧', y:GROUND()-38};
-  if (r < 0.8) return {kind:'beam', w:74, h:24, emoji:'🏗️', y:GROUND()-110};
-  const width = 120 + Math.random()*90;
-  return {kind:'hole', w:width, h:20, emoji:'🕳️', y:GROUND()};
+  if (r < 0.5) return {kind:'barricade', w:48, h:40, x:0, y:0};
+  if (r < 0.8) return {kind:'beam',      w:84, h:22, x:0, y:0};
+  const width = 120 + Math.random()*100;
+  return {kind:'hole', w:width, h:24, x:0, y:0};
 }
 
-/* ---------- State ---------- */
+/* -------------------------------------------------------------
+   State
+------------------------------------------------------------- */
 let best = Number(localStorage.getItem('runner_best')||0); bestEl.textContent = best;
 let lives, score, speed, paused, gameOver, obstacles, lastSpawn, spawnDelay, lastTime;
-let helpCharges, helpCooldown;
+let helpCharges, helpCooldown, dust=[];
 
 function reset(){
   lives=MAX_LIVES; score=0; speed=START_SPEED; paused=true; gameOver=false;
   obstacles=[]; lastSpawn=0; spawnDelay=SPAWN_BASE; helpCharges=2; helpCooldown=0;
-  PLAYER.y = GROUND()-PLAYER.h; PLAYER.vy=0; PLAYER.onGround=true; PLAYER.duck=false; PLAYER.airlift=false; PLAYER.airTimer=0;
+  dust.length=0;
+  PLAYER.y = GROUND()-PLAYER.h; PLAYER.vy=0; PLAYER.onGround=true; PLAYER.duck=false; PLAYER.airlift=false; PLAYER.airTimer=0; PLAYER.frame=0; PLAYER.frameTime=0;
   render(0); updateUI();
 }
 reset();
 
-/* ---------- UI ---------- */
+/* -------------------------------------------------------------
+   UI helpers
+------------------------------------------------------------- */
 function updateUI(){
   scoreEl.textContent = Math.floor(score);
   livesEl.textContent = "⛑️".repeat(lives) || "—";
@@ -219,7 +243,9 @@ function updateUI(){
   helpBtn.textContent = `🆘 Help (Crane) ${helpCharges>0 ? `· ${helpCharges}` : helpCooldown>0 ? `· cooldown` : ''}`;
 }
 
-/* ---------- Input ---------- */
+/* -------------------------------------------------------------
+   Input
+------------------------------------------------------------- */
 function jump(){ if (!paused && !gameOver && PLAYER.onGround && !PLAYER.airlift){ PLAYER.vy=JUMP_V; PLAYER.onGround=false; } }
 function setDuck(on){ if (!paused && !gameOver && PLAYER.onGround && !PLAYER.airlift){ PLAYER.duck=on; } }
 function tryHelp(){
@@ -245,19 +271,31 @@ helpBtn.onclick = tryHelp;
 
 function togglePause(){ if (gameOver) return; paused = !paused; if (!paused) startLoop(); }
 
-/* ---------- Update/render ---------- */
+/* -------------------------------------------------------------
+   Simulation
+------------------------------------------------------------- */
 function rectsOverlap(ax,ay,aw,ah,bx,by,bw,bh){ return ax<bx+bw && ax+aw>bx && ay<by+bh && ay+ah>by; }
 
 function spawnIfNeeded(ms){
   lastSpawn += ms;
   if (lastSpawn >= spawnDelay){
     lastSpawn=0;
-    const last = obstacles[obstacles.length-1];
     const o = makeObstacle();
-    if (last && last.kind==='hole' && o.kind==='hole'){ o.kind='barricade'; o.w=42; o.h=38; o.y=GROUND()-38; o.emoji='🚧'; }
-    o.x = W()+20; obstacles.push(o);
-    spawnDelay = SPAWN_BASE - Math.min(500, (speed-START_SPEED)*0.8) + Math.random()*SPAWN_VAR;
+    o.x = W()+20;
+    o.y = (o.kind==='barricade') ? GROUND()-o.h :
+          (o.kind==='beam')     ? GROUND()-110 :
+                                   GROUND();
+    obstacles.push(o);
+    spawnDelay = SPAWN_BASE - Math.min(520, (speed-START_SPEED)*0.8) + Math.random()*SPAWN_VAR;
   }
+}
+
+function addDust(){
+  // small grounded dust puffs when running
+  if (!PLAYER.onGround || PLAYER.airlift) return;
+  if (Math.random()<0.5) return;
+  dust.push({x:PLAYER.x+8+Math.random()*12, y:GROUND()-6, r:2+Math.random()*2, a:.35, vx:-speed*0.004, vy:-15-Math.random()*12});
+  if (dust.length>60) dust.shift();
 }
 
 function update(dt){
@@ -271,10 +309,8 @@ function update(dt){
     PLAYER.y = GROUND() - PLAYER.h - lift;
     if (PLAYER.airTimer<=0){ PLAYER.airlift=false; PLAYER.onGround=false; showToast("✅ Safe across"); }
   }else{
-    // height for duck
-    const targetH = PLAYER.duck? DUCK_H : 46;
+    const targetH = PLAYER.duck? DUCK_H : 56;
     if (PLAYER.h !== targetH){ PLAYER.h = targetH; if (PLAYER.onGround) PLAYER.y = GROUND()-PLAYER.h; }
-    // gravity
     PLAYER.vy += GRAVITY*dt; PLAYER.y += PLAYER.vy*dt;
     const gy = GROUND()-PLAYER.h;
     if (PLAYER.y >= gy){ PLAYER.y=gy; PLAYER.vy=0; PLAYER.onGround=true; }
@@ -284,6 +320,7 @@ function update(dt){
   obstacles = obstacles.filter(o=> o.x + o.w > -40);
 
   spawnIfNeeded(dt*1000);
+  addDust();
 
   // collisions
   for (const o of obstacles){
@@ -292,9 +329,9 @@ function update(dt){
       const inHole = center>o.x && center<o.x+o.w;
       const feetGround = PLAYER.y + PLAYER.h >= GROUND()-2;
       if (!PLAYER.airlift && inHole && feetGround){ loseLife(); break; }
-    }else if (o.kind==='barricade'){
+    } else if (o.kind==='barricade'){
       if (rectsOverlap(PLAYER.x,PLAYER.y,PLAYER.w,PLAYER.h, o.x,o.y,o.w,o.h)){ loseLife(); break; }
-    }else if (o.kind==='beam'){
+    } else if (o.kind==='beam'){
       if (rectsOverlap(PLAYER.x,PLAYER.y,PLAYER.w,PLAYER.h, o.x,o.y,o.w,o.h) && !PLAYER.duck){ loseLife(); break; }
     }
   }
@@ -303,9 +340,10 @@ function update(dt){
 }
 
 function loseLife(){
-  lives--; showToast(lives>0? "💥 Ouch! −1 life" : "💥 Out of lives");
+  lives--;
+  showToast(lives>0? "💥 Ouch! −1 life" : "💥 Out of lives");
   PLAYER.y=GROUND()-PLAYER.h; PLAYER.vy=0; PLAYER.onGround=true; PLAYER.duck=false; PLAYER.airlift=false; PLAYER.airTimer=0;
-  obstacles = obstacles.filter(o=> o.x > PLAYER.x + 42);
+  obstacles = obstacles.filter(o=> o.x > PLAYER.x + 46);
   if (lives<=0) endGame();
 }
 
@@ -316,68 +354,186 @@ function endGame(){
   showToast(`Game over — Score <b>${Math.floor(score)}</b> · Best <b>${best}</b>`);
 }
 
-function render(ts){
-  const w=W(), h=H(); ctx.clearRect(0,0,w,h);
-
-  // subtle grid
+/* -------------------------------------------------------------
+   Rendering (parallax grid, vector obstacles, sprite runner)
+------------------------------------------------------------- */
+function drawGrid(ts){
   ctx.save(); ctx.globalAlpha=.06; ctx.strokeStyle='#8ab3ff'; ctx.lineWidth=1;
   const step=24, xoff=(ts/80)%step;
-  for(let x=xoff; x<w; x+=step){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
-  for(let y=0; y<h; y+=step){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+  for(let x=xoff; x<W(); x+=step){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H()); ctx.stroke(); }
+  for(let y=0; y<H(); y+=step){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W(),y); ctx.stroke(); }
+  ctx.restore();
+}
+function drawGround(){
+  ctx.strokeStyle = '#2a3b55'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(0,GROUND()+.5); ctx.lineTo(W(),GROUND()+.5); ctx.stroke();
+}
+function drawHole(o){
+  const y = o.y, h = 30;
+  ctx.save();
+  const grad = ctx.createLinearGradient(0,y,0,y+h);
+  grad.addColorStop(0,'#07101f'); grad.addColorStop(1,'#000814');
+  ctx.fillStyle = grad; ctx.fillRect(o.x, y, o.w, h);
+  ctx.restore();
+}
+function drawBarricade(o){
+  ctx.save();
+  // frame
+  ctx.fillStyle='#1a263a'; ctx.fillRect(o.x, o.y, o.w, o.h);
+  // stripes
+  const stripeW = 10;
+  for(let x=o.x; x<o.x+o.w+o.h; x+=stripeW){
+    ctx.fillStyle = ((Math.floor((x-o.x)/stripeW)%2)===0) ? '#ffc43d' : '#1e293b';
+    ctx.beginPath();
+    ctx.moveTo(x, o.y);
+    ctx.lineTo(x+stripeW, o.y);
+    ctx.lineTo(x, o.y+o.h);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.strokeStyle='#2b3b52'; ctx.lineWidth=2; ctx.strokeRect(o.x+0.5, o.y+0.5, o.w-1, o.h-1);
+  ctx.restore();
+}
+function drawBeam(o){
+  ctx.save();
+  const r=8;
+  ctx.fillStyle='#ffd166';
+  ctx.beginPath();
+  ctx.moveTo(o.x+r, o.y);
+  ctx.lineTo(o.x+o.w-r, o.y);
+  ctx.quadraticCurveTo(o.x+o.w, o.y, o.x+o.w, o.y+r);
+  ctx.lineTo(o.x+o.w, o.y+o.h-r);
+  ctx.quadraticCurveTo(o.x+o.w, o.y+o.h, o.x+o.w-r, o.y+o.h);
+  ctx.lineTo(o.x+r, o.y+o.h);
+  ctx.quadraticCurveTo(o.x, o.y+o.h, o.x, o.y+o.h-r);
+  ctx.lineTo(o.x, o.y+r);
+  ctx.quadraticCurveTo(o.x, o.y, o.x+r, o.y);
+  ctx.fill();
+  // hazard diagonal
+  ctx.strokeStyle='#2e3a54'; ctx.lineWidth=3; ctx.globalAlpha=.5;
+  for(let x=o.x-12; x<o.x+o.w+o.h; x+=14){
+    ctx.beginPath(); ctx.moveTo(x, o.y+o.h); ctx.lineTo(x+28, o.y); ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawDust(){
+  ctx.save();
+  for(const p of dust){
+    p.x += p.vx; p.y += p.vy*0.016; p.vy += 22*0.016; p.a -= 0.01;
+    ctx.globalAlpha=Math.max(0,p.a);
+    ctx.fillStyle='#96a7c3';
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+  }
+  dust = dust.filter(p=>p.a>0);
+  ctx.restore();
+}
+
+function drawRunner(ts){
+  // drop shadow
+  ctx.save();
+  const shadowY = GROUND()+2;
+  ctx.globalAlpha = 0.25;
+  ctx.fillStyle = '#000';
+  const shW = 28, shH = 6;
+  ctx.beginPath();
+  ctx.ellipse(PLAYER.x+PLAYER.w*0.45, shadowY, shW, shH, 0, 0, Math.PI*2);
+  ctx.fill();
   ctx.restore();
 
-  // ground
-  ctx.strokeStyle = '#2a3b55'; ctx.lineWidth=3;
-  ctx.beginPath(); ctx.moveTo(0,GROUND()+.5); ctx.lineTo(w,GROUND()+.5); ctx.stroke();
+  // sprite or fallback vector
+  if (spriteLoaded){
+    // animate frames only when moving on ground
+    const frameRate = 12; // FPS
+    if (PLAYER.onGround && !paused && !gameOver && !PLAYER.airlift){
+      PLAYER.frameTime += (ts - (drawRunner.prevTs||ts));
+      const frameDur = 1000/frameRate;
+      while (PLAYER.frameTime >= frameDur){ PLAYER.frame=(PLAYER.frame+1)%SPRITE_CONFIG.cols; PLAYER.frameTime-=frameDur; }
+    } else {
+      // airborne: hold a mid frame
+      PLAYER.frame = 2;
+    }
+    drawRunner.prevTs = ts;
 
-  // holes
-  for(const o of obstacles){ if (o.kind==='hole'){
-    ctx.save(); ctx.fillStyle='#07101f'; ctx.fillRect(o.x, o.y, o.w, 30);
-    ctx.globalAlpha=.8; ctx.font='20px system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji';
-    ctx.fillText('🕳️', o.x + o.w/2 - 10, o.y + 20); ctx.restore();
-  }}
+    const fw = SPRITE_CONFIG.frameW, fh = SPRITE_CONFIG.frameH;
+    const scale = SPRITE_CONFIG.scale * (PLAYER.duck ? 0.85 : 1);
+    const dw = fw*scale, dh = fh*scale;
 
-  // barricades & beams
-  ctx.font='32px system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji';
+    const sx = PLAYER.frame*fw, sy = 0;
+    const dx = PLAYER.x - 6, dy = PLAYER.y + PLAYER.h - dh;  // align feet to ground
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(runnerImg, sx, sy, fw, fh, dx, dy, dw, dh);
+  } else {
+    // fallback flat vector runner
+    ctx.save();
+    ctx.translate(PLAYER.x+PLAYER.w*0.3, PLAYER.y+PLAYER.h);
+    // body
+    ctx.strokeStyle='#f1f5f9'; ctx.lineWidth=3;
+    // head (helmet)
+    ctx.fillStyle='#ffd166';
+    ctx.beginPath(); ctx.arc(0,-28,8,0,Math.PI*2); ctx.fill();
+    // torso
+    ctx.beginPath(); ctx.moveTo(0,-20); ctx.lineTo(0,-6); ctx.stroke();
+    // legs (simple gait)
+    const t = (ts/120)%Math.PI;
+    const a = Math.sin(t)*6;
+    ctx.beginPath(); ctx.moveTo(0,-6); ctx.lineTo(8+a,8); ctx.moveTo(0,-6); ctx.lineTo(-8-a,8); ctx.stroke();
+    // arms
+    ctx.beginPath(); ctx.moveTo(0,-16); ctx.lineTo(10-a,-6); ctx.moveTo(0,-16); ctx.lineTo(-10+a,-8); ctx.stroke();
+    ctx.restore();
+  }
+
+  drawDust();
+}
+
+function render(ts){
+  ctx.clearRect(0,0,W(),H());
+  drawGrid(ts);
+  drawGround();
+
+  // obstacles
   for(const o of obstacles){
-    if (o.kind!=='hole'){ ctx.fillText(o.emoji, o.x, o.y + o.h); }
+    if (o.kind==='hole') drawHole(o);
+    else if (o.kind==='barricade') drawBarricade(o);
+    else drawBeam(o);
   }
 
-  // player (face RIGHT): draw emoji normally (most fonts face forward). Add crane rope when airlift.
+  // crane rope when airlift
   if (PLAYER.airlift){
-    const hx = PLAYER.x + PLAYER.w/2, hy = 38;
+    const hx = PLAYER.x + PLAYER.w/2, hy = 40;
     ctx.strokeStyle='#5aa6ff'; ctx.globalAlpha=.7; ctx.lineWidth=2;
-    ctx.beginPath(); ctx.moveTo(hx,hy); ctx.lineTo(hx, PLAYER.y+6); ctx.stroke();
-    ctx.globalAlpha=1; ctx.font='28px system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji';
-    ctx.fillText('🪝', hx-14, hy+8);
+    ctx.beginPath(); ctx.moveTo(hx,hy); ctx.lineTo(hx, PLAYER.y+8); ctx.stroke();
+    ctx.globalAlpha=1; ctx.font='26px system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji';
+    ctx.fillText('🪝', hx-13, hy+8);
   }
-  const char = PLAYER.onGround ? (PLAYER.duck? '🧎‍♀️' : '👷‍♀️') : '👷‍♀️';
-  ctx.font = (PLAYER.duck? '34px':'36px') + ' system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji';
-  ctx.fillText(char, PLAYER.x, PLAYER.y + PLAYER.h);
+
+  drawRunner(ts);
 
   if (paused){
     ctx.save();
-    ctx.fillStyle='rgba(11,18,32,.55)'; ctx.fillRect(0,0,w,h);
+    ctx.fillStyle='rgba(11,18,32,.55)'; ctx.fillRect(0,0,W(),H());
     ctx.fillStyle='#e2e8f0'; ctx.textAlign='center';
-    ctx.font='700 22px system-ui'; ctx.fillText(gameOver?'Game Over':'Paused', w/2, h/2 - 8);
+    ctx.font='700 22px system-ui'; ctx.fillText(gameOver?'Game Over':'Paused', W()/2, H()/2 - 8);
     ctx.font='14px system-ui';
-    ctx.fillText('Space/↑ Jump • ↓ Duck • H Help • P Pause • R Restart', w/2, h/2 + 16);
+    ctx.fillText('Space/↑ Jump • ↓ Duck • H Help • P Pause • R Restart', W()/2, H()/2 + 16);
     ctx.restore();
   }
 }
 
+/* -------------------------------------------------------------
+   Loop
+------------------------------------------------------------- */
+let lastTs=0;
 function tick(ts){
   if (paused) return;
-  if (!lastTime) lastTime=ts;
-  const dt=(ts-lastTime)/1000; lastTime=ts;
+  if (!lastTs) lastTs=ts;
+  const dt=(ts-lastTs)/1000; lastTs=ts;
   update(dt); render(ts); requestAnimationFrame(tick);
 }
-function startLoop(){ if (!paused){ lastTime=performance.now(); requestAnimationFrame(tick); } }
+function startLoop(){ if (!paused){ lastTs=performance.now(); requestAnimationFrame(tick); } }
 
-/* ---------- Boot ---------- */
-render(0);
-
-/* ---------- Feedback (Google Form direct submit) ---------- */
+/* -------------------------------------------------------------
+   Feedback (Google Form direct submit)
+------------------------------------------------------------- */
 const modal=document.getElementById('modal');
 const feedbackBtn=document.getElementById('feedbackBtn');
 const cancelBtn=document.getElementById('cancel');
@@ -399,11 +555,24 @@ sendBtn.onclick=()=>{
   alert("Thanks! Your feedback was sent ✅"); modal.classList.remove('open'); fbText.value="";
 };
 
-/* ---------- start/pause/restart hooks ---------- */
+/* -------------------------------------------------------------
+   Wire up pause/resume
+------------------------------------------------------------- */
+function togglePause(){ if (gameOver) return; paused = !paused; if (!paused) startLoop(); }
 playBtn.addEventListener('click', ()=> startLoop());
 pauseBtn.addEventListener('click', ()=> startLoop());
 restartBtn.addEventListener('click', ()=> startLoop());
 document.addEventListener('keydown', ()=> startLoop(), { once:true });
+
+/* -------------------------------------------------------------
+   Final helpers
+------------------------------------------------------------- */
+function endGame(){
+  gameOver=true; paused=true;
+  if (Math.floor(score) > best){ best=Math.floor(score); localStorage.setItem('runner_best', String(best)); }
+  bestEl.textContent = best;
+  showToast(`Game over — Score <b>${Math.floor(score)}</b> · Best <b>${best}</b>`);
+}
 </script>
 </body>
 </html>
