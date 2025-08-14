@@ -30,6 +30,8 @@
       border:1px solid var(--border); border-radius:20px;
       padding:28px 28px 22px;
       box-shadow:0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+      transform: perspective(900px) rotateX(0) rotateY(0); /* for tilt baseline */
+      transition: transform .12s ease-out;
     }
     h1{ font-size: clamp(28px,5vw,44px); margin:8px 0 14px; line-height:1.1; }
     .msg p{ font-size: clamp(16px,2.6vw,20px); opacity:.95; margin:0 0 12px; line-height:1.6; }
@@ -72,6 +74,16 @@
       font-family: inherit; font-size:14px;
     }
     .modal-actions{ margin-top:12px; display:flex; gap:10px; justify-content:flex-end; }
+
+    /* Toast (custom thank-you message) */
+    .toast{
+      position:fixed; left:50%; top:20px; transform:translateX(-50%) translateY(-8px);
+      background:#0b1220f2; border:1px solid var(--border); border-radius:14px;
+      padding:12px 14px; box-shadow:0 16px 40px rgba(0,0,0,.45); backdrop-filter: blur(10px);
+      z-index:30; opacity:0; pointer-events:none; white-space:pre-wrap; text-align:center; min-width:260px;
+      transition:opacity .25s ease, transform .25s ease;
+    }
+    .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
     /* Emoji rain (behind the card) */
     .emoji{ position:fixed; top:-60px; z-index:1; pointer-events:auto; user-select:none; }
@@ -165,6 +177,9 @@
     </div>
   </div>
 
+  <!-- Custom toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
   <!-- Hidden iframe target for Google Form submission -->
   <iframe name="gform-target" style="display:none"></iframe>
 
@@ -213,6 +228,13 @@
     const fbText  = document.getElementById('fbText');
     const fbName  = document.getElementById('fbName');
 
+    function showToast(text){
+      const t = document.getElementById('toast');
+      t.textContent = text;
+      t.classList.add('show');
+      setTimeout(()=> t.classList.remove('show'), 2600);
+    }
+
     openMsg.addEventListener('click', ()=>{ modal.classList.add('open'); fbName.focus(); });
     cancel .addEventListener('click', ()=> modal.classList.remove('open'));
 
@@ -220,8 +242,8 @@
       const nameVal = fbName.value.trim();
       const msg = fbText.value.trim();
 
-      if (!nameVal) { alert("Please enter your name 🙂"); return; }
-      if (!msg)     { alert("Please write your message 🙂"); return; }
+      if (!nameVal) { showToast("Please enter your name 🙂"); return; }
+      if (!msg)     { showToast("Please write your message 🙂"); return; }
 
       const form = document.createElement('form');
       form.method = 'POST';
@@ -240,7 +262,9 @@
       fbText.value = "";
       fbName.value = "";
       modal.classList.remove('open');
-      alert("Thanks! Your message was sent ✅");
+
+      // Custom friendly message instead of browser alert:
+      showToast(`${nameVal}, thank you very much 🤝\nLet's stay in touch!\n— Irfana`);
     });
 
     /* ---------- Continuous, natural emoji rain ---------- */
@@ -311,7 +335,54 @@
       // small initial burst so it feels “already raining”
       for (let i=0;i<14;i++) setTimeout(spawnEmoji, i*90);
     });
+
+    /* ---------- Option 1: Card tilt / parallax ---------- */
+    (() => {
+      const card = document.getElementById('card');
+      const maxTilt = 6; // degrees
+      function tilt(e){
+        const r = card.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width;
+        const py = (e.clientY - r.top)  / r.height;
+        const rx = (py - 0.5) * -maxTilt;
+        const ry = (px - 0.5) *  maxTilt;
+        card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+      }
+      function reset(){ card.style.transform = 'perspective(900px) rotateX(0) rotateY(0)'; }
+      card.addEventListener('mousemove', tilt);
+      card.addEventListener('mouseleave', reset);
+    })();
+
+    /* ---------- Option 2: Click fireworks anywhere ---------- */
+    (() => {
+      const burst = (x,y) => {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const bits = ['✨','🌟','💛','💙','🤍'];
+        for (let i=0;i<8;i++){
+          const s = document.createElement('div');
+          s.className = 'sparkle';
+          s.textContent = bits[Math.floor(Math.random()*bits.length)];
+          s.style.left = x + 'px'; s.style.top = y + 'px';
+          s.style.transition = 'transform .7s ease-out, opacity .7s ease-out';
+          document.body.appendChild(s);
+          requestAnimationFrame(()=>{
+            const dx = (Math.random()-0.5)*90, dy = (Math.random()-0.8)*120;
+            s.style.transform = `translate(${dx}px, ${dy}px) scale(1.1)`;
+            s.style.opacity = 0;
+          });
+          setTimeout(()=>s.remove(), 800);
+        }
+      };
+      document.addEventListener('click', (e)=>{
+        // ignore clicks on buttons/inputs/links/modal
+        const tag = e.target.tagName;
+        if (['BUTTON','A','TEXTAREA','INPUT'].includes(tag)) return;
+        // ignore clicks inside modal/popover
+        if (e.target.closest('.modal-card') || e.target.closest('.popover')) return;
+        burst(e.clientX, e.clientY);
+        if (navigator.vibrate) navigator.vibrate(8);
+      });
+    })();
   </script>
 </body>
 </html>
-
