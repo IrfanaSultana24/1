@@ -110,54 +110,19 @@
     @keyframes sparkleUp{ 0%{ transform: translateY(0) scale(.9); opacity:.95 }
                           100%{ transform: translateY(-28px) scale(1.1); opacity:0 } }
 
-    /* 🎵 Floating Music FAB (Option B) */
-    .music-fab {
-      position: fixed;
-      right: 20px;
-      bottom: 20px;
-      z-index: 50;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    /* Music widget */
+    .music{
+      position:fixed; right:14px; bottom:14px; z-index:26;
+      display:flex; align-items:center; gap:8px;
+      background:#0b1220cc; border:1px solid var(--border); border-radius:12px; padding:8px 10px;
+      box-shadow:0 12px 30px rgba(0,0,0,.35); backdrop-filter: blur(8px);
     }
-    .music-volume {
-      display: none;
-      margin-bottom: 10px;
-      transform: rotate(-90deg);
-      background: rgba(0,0,0,0.6);
-      padding: 6px 8px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      box-shadow: 0 10px 24px rgba(0,0,0,.45);
+    .music button{
+      appearance:none; border:1px solid #2b3b52; background:#0e1728; color:var(--text);
+      padding:6px 10px; border-radius:10px; cursor:pointer; font-weight:600;
     }
-    .music-fab:hover .music-volume,
-    .music-fab.show-volume .music-volume {
-      display: block;
-    }
-    .music-volume input[type="range"]{
-      width: 120px;
-      accent-color: #9bd3ff;
-    }
-    .music-btn {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: white;
-      border: none;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.45);
-      transition: transform 0.2s ease, box-shadow 0.2s ease, filter .2s ease;
-    }
-    .music-btn:hover {
-      transform: scale(1.08);
-      box-shadow: 0 10px 22px rgba(0,0,0,0.55);
-      filter: brightness(1.05);
-    }
+    .music button:hover{ border-color:#475569; }
+    .music input[type="range"]{ width:120px; }
 
     /* Reduced motion */
     @media (prefers-reduced-motion: reduce){
@@ -229,13 +194,11 @@
   <!-- Custom toast -->
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <!-- Hidden audio (src can be overridden by ?music=URL) -->
-  <audio id="bg-music.mp3" preload="auto" loop></audio>
-
-  <!-- 🎵 Floating Music FAB -->
-  <div class="music-fab" id="musicFab">
-    <div class="music-volume"><input id="musicVol" type="range" min="0" max="1" step="0.01" value="0.3"></div>
-    <button class="music-btn" id="musicToggle" title="Play Music">🎵</button>
+  <!-- Music (Option 2) -->
+  <audio id="bgMusic" src="bg-music.mp3" preload="auto" loop></audio>
+  <div class="music" id="musicWidget" aria-live="polite">
+    <button id="musicToggle" aria-pressed="false">▶️ Music</button>
+    <input id="musicVol" type="range" min="0" max="1" step="0.01" title="Volume">
   </div>
 
   <!-- Hidden iframe target for Google Form submission -->
@@ -274,12 +237,14 @@
     });
 
     /* ---------- Send message modal (Google Form submit) ---------- */
+    // From your pre-fill link → formResponse endpoint + field id:
+    // https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/viewform?usp=pp_url&entry.1175385091=...
     const GF_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/formResponse";
     const GF_FIELD  = "entry.1175385091";
 
     const modal   = document.getElementById('modal');
     const sendBtn = document.getElementById('send');
-    const theCancel  = document.getElementById('cancel');
+    theCancel  = document.getElementById('cancel');
     const openMsg = document.getElementById('sendMsgBtn');
     const fbText  = document.getElementById('fbText');
     const fbName  = document.getElementById('fbName');
@@ -289,7 +254,7 @@
       t.textContent = text;
       t.classList.add('show');
       clearTimeout(showToast._timer);
-      showToast._timer = setTimeout(()=> t.classList.remove('show'), 20000); // 20s
+      showToast._timer = setTimeout(()=> t.classList.remove('show'), 20000);
     }
 
     openMsg.addEventListener('click', ()=>{ modal.classList.add('open'); fbName.focus(); });
@@ -320,14 +285,16 @@
       fbName.value = "";
       modal.classList.remove('open');
 
+      // Custom friendly message instead of browser alert:
       showToast(`${nameVal}, thank you very much 🤝\nLet's stay in touch!\n— Irfana`);
     });
 
     /* ---------- Continuous, natural emoji rain ---------- */
     const EMOJIS = ["👋","🤝","💐","🏗️","👩‍💻","🌼","🙏","🎉","💌"];
-    const MAX_ACTIVE = 40;
-    const SPAWN_MS   = 260;
-    const DUR_RANGE  = [10, 20];
+
+    const MAX_ACTIVE = 40;          // cap on screen
+    const SPAWN_MS   = 260;         // every 0.26s
+    const DUR_RANGE  = [10, 20];    // fall duration (s), varied per item
 
     function sparkle(x,y,txt="✨"){
       const s = document.createElement('div');
@@ -351,7 +318,8 @@
       span.className = 'inner';
       span.textContent = EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
 
-      const leftVW = Math.random()*100;
+      // random across whole viewport
+      const leftVW = Math.random()*100; // 0–100vw
       const dur    = DUR_RANGE[0] + Math.random()*(DUR_RANGE[1]-DUR_RANGE[0]);
       const delay  = Math.random()*0.5;
       const size   = 22 + Math.random()*22;
@@ -378,12 +346,14 @@
       wrap.appendChild(span);
       document.body.appendChild(wrap);
 
+      // clean up once it reaches the bottom
       setTimeout(()=>{ if (!popped) wrap.remove(); }, (dur+delay+0.8)*1000);
     }
 
+    // kick off continuous rain
     window.addEventListener('load', ()=>{
-      setInterval(spawnEmoji, SPAWN_MS);
-      for (let i=0;i<14;i++) setTimeout(spawnEmoji, i*90);
+      setInterval(spawnEmoji, SPAWN_MS);  // continuous, dispersed
+      for (let i=0;i<14;i++) setTimeout(spawnEmoji, i*90); // initial sprinkle
     });
 
     /* ---------- Option 1: Card tilt / parallax ---------- */
@@ -432,58 +402,43 @@
       });
     })();
 
-    /* ---------- Background Music (Floating FAB) ---------- */
-    const audio   = document.getElementById('bgMusic');
-    const musicToggle = document.getElementById('musicToggle');
-    const musicVol    = document.getElementById('musicVol');
-    const musicFab    = document.getElementById('musicFab');
-
-    // Source: from querystring or gentle free track
-    const trackUrl = qs.get('music') ||
-      'https://cdn.pixabay.com/download/audio/2022/10/26/audio_3d845cc82f.mp3?filename=gentle-ambient-piano-ambient-background-music-12461.mp3';
-    audio.src = trackUrl;
-
-    // Defaults + restore
-    const savedVol = Number(localStorage.getItem('gb_music_vol') || 0.3);
+    /* ---------- Background Music (Option 2) ---------- */
+    const music    = document.getElementById('bgMusic');
+    const toggle   = document.getElementById('musicToggle');
+    const vol      = document.getElementById('musicVol');
+    const savedVol = Number(localStorage.getItem('gb_music_vol') || 0.35);
     const savedOn  = localStorage.getItem('gb_music_on') === '1';
-    audio.volume = Math.min(1, Math.max(0, savedVol));
-    musicVol.value = audio.volume;
 
-    function setMusicUI(){
-      const on = !audio.paused;
-      musicToggle.textContent = on ? '⏸' : '🎵';
-      musicToggle.title = on ? 'Pause Music' : 'Play Music';
-      musicToggle.setAttribute('aria-pressed', String(on));
+    music.volume = Math.min(1, Math.max(0, savedVol));
+    vol.value = music.volume;
+
+    function setToggleUI(){
+      const on = !music.paused;
+      toggle.textContent = on ? '⏸️ Music' : '▶️ Music';
+      toggle.setAttribute('aria-pressed', String(on));
     }
 
-    musicToggle.addEventListener('click', async () => {
-      if (audio.paused){
-        try { await audio.play(); localStorage.setItem('gb_music_on','1'); }
-        catch(e){ /* autoplay blocked until user gesture */ }
+    toggle.addEventListener('click', async ()=>{
+      if (music.paused){
+        try { await music.play(); localStorage.setItem('gb_music_on','1'); }
+        catch(e){ /* autoplay block — ignore */ }
       } else {
-        audio.pause();
+        music.pause();
         localStorage.setItem('gb_music_on','0');
       }
-      setMusicUI();
+      setToggleUI();
     });
 
-    musicVol.addEventListener('input', () => {
-      audio.volume = Number(musicVol.value);
-      localStorage.setItem('gb_music_vol', String(audio.volume));
+    vol.addEventListener('input', ()=>{
+      music.volume = Number(vol.value);
+      localStorage.setItem('gb_music_vol', String(music.volume));
     });
 
-    // Mobile: double-tap to toggle volume visibility
-    let volumeVisible = false;
-    musicToggle.addEventListener('dblclick', () => {
-      volumeVisible = !volumeVisible;
-      musicFab.classList.toggle('show-volume', volumeVisible);
-    });
-
-    // Try to start music if previously on (after first gesture)
+    // Try to start music on first user interaction if previously on
     const tryStart = async () => {
-      if (savedOn && audio.paused){
-        try { await audio.play(); } catch(e){ /* user gesture needed */ }
-        setMusicUI();
+      if (savedOn && music.paused){
+        try { await music.play(); } catch(e){ /* blocked until user gesture */ }
+        setToggleUI();
       }
       window.removeEventListener('pointerdown', tryStart, {once:true});
       window.removeEventListener('keydown', tryStart, {once:true});
@@ -491,8 +446,8 @@
     window.addEventListener('pointerdown', tryStart, {once:true});
     window.addEventListener('keydown', tryStart, {once:true});
 
-    // Initial UI
-    setMusicUI();
+    // Initial label
+    setToggleUI();
   </script>
 </body>
 </html>
