@@ -1,456 +1,241 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🎉 A Little Goodbye</title>
-  <meta name="color-scheme" content="dark light">
-  <style>
-    :root{
-      --bg1:#0f172a; --bg2:#1e293b;
-      --card:#0b1220cc;            /* adjust transparency via the last two hex digits */
-      --text:#e2e8f0; --muted:#cbd5e1; --border:#1f2a44;
-      --accent:#30c48d; --accent-2:#22a3ff;
-    }
-    html,body{height:100%;margin:0}
-    body{
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial;
-      color:var(--text);
-      display:grid; place-items:center;
-      background: radial-gradient(1200px 800px at 10% 10%, var(--bg2), var(--bg1));
-      background-size: cover; background-position: center; background-attachment: fixed;
-      overflow-x:hidden;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>🎉 A Little Goodbye</title>
+<meta name="color-scheme" content="dark light">
+<style>
+  :root{
+    --bg1:#0f172a; --bg2:#1e293b;
+    --card:#0b1220cc;
+    --text:#e2e8f0; --muted:#cbd5e1; --border:#1f2a44;
+    --accent:#30c48d; --accent-2:#22a3ff;
+  }
+  html,body{height:100%;margin:0}
+  body{
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial;
+    color:var(--text);
+    display:grid; place-items:center;
+    background: radial-gradient(1200px 800px at 10% 10%, var(--bg2), var(--bg1));
+    background-size: cover; background-position: center; background-attachment: fixed;
+    overflow-x:hidden;
+  }
 
-    /* Main card */
-    .card{
-      position:relative; z-index:2; max-width:760px; width:min(92vw,760px);
-      backdrop-filter: blur(12px);
-      background: var(--card);
-      border:1px solid var(--border); border-radius:20px;
-      padding:28px 28px 22px;
-      box-shadow:0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
-      transform: perspective(900px) rotateX(0) rotateY(0); /* for tilt baseline */
-      transition: transform .12s ease-out;
-    }
-    h1{ font-size: clamp(28px,5vw,44px); margin:8px 0 14px; line-height:1.1; }
-    .msg p{ font-size: clamp(16px,2.6vw,20px); opacity:.95; margin:0 0 12px; line-height:1.6; }
-    .meta{ opacity:.8; font-size:14px; margin-top:10px; }
-    .row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+  /* Main card */
+  .card{
+    position:relative; z-index:2; max-width:760px; width:min(92vw,760px);
+    backdrop-filter: blur(12px);
+    background: var(--card);
+    border:1px solid var(--border); border-radius:20px;
+    padding:28px 28px 22px;
+    box-shadow:0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+    transform: perspective(900px) rotateX(0) rotateY(0);
+    transition: transform .12s ease-out;
+  }
+  h1{ font-size: clamp(28px,5vw,44px); margin:8px 0 14px; line-height:1.1; }
+  .msg p{ font-size: clamp(16px,2.6vw,20px); opacity:.95; margin:0 0 12px; line-height:1.6; }
+  .meta{ opacity:.8; font-size:14px; margin-top:10px; }
+  .row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
 
-    .btn{
-      appearance:none; border:1px solid #334155; background:#0b1220; color:var(--text);
-      padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600;
-      transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
-      text-decoration:none; display:inline-flex; align-items:center; gap:.5rem;
-    }
-    .btn:hover{ border-color:#475569; box-shadow:0 8px 20px rgba(0,0,0,.25); transform:translateY(-1px); }
-    .btn.primary{ background: linear-gradient(90deg, var(--accent), var(--accent-2)); color:#081018; border:0; }
-    .btn.primary:hover{ filter:brightness(1.05); }
+  .btn{
+    appearance:none; border:1px solid #334155; background:#0b1220; color:var(--text);
+    padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600;
+    transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+    text-decoration:none; display:inline-flex; align-items:center; gap:.5rem;
+  }
+  .btn:hover{ border-color:#475569; box-shadow:0 8px 20px rgba(0,0,0,.25); transform:translateY(-1px); }
+  .btn.primary{ background: linear-gradient(90deg, var(--accent), var(--accent-2)); color:#081018; border:0; }
+  .btn.primary:hover{ filter:brightness(1.05); }
 
-    /* Get in touch popover */
-    .popover{
-      position:absolute; z-index:3; margin-top:8px; inset-inline-start:0;
-      background:#0b1220f2; border:1px solid var(--border); border-radius:14px;
-      padding:12px; box-shadow:0 16px 40px rgba(0,0,0,.45); backdrop-filter: blur(10px);
-      min-width:280px; display:none;
-    }
-    .popover.open{ display:block; }
-    .contact-line{ display:flex; align-items:center; gap:.5rem; font-size:14px; color:var(--muted); }
-    .contact-line a{ color:#9bd3ff; text-decoration:none; }
-    .contact-line a:hover{ text-decoration:underline; }
+  /* Popover */
+  .popover{
+    position:absolute; z-index:3; margin-top:8px; inset-inline-start:0;
+    background:#0b1220f2; border:1px solid var(--border); border-radius:14px;
+    padding:12px; box-shadow:0 16px 40px rgba(0,0,0,.45); backdrop-filter: blur(10px);
+    min-width:280px; display:none;
+  }
+  .popover.open{ display:block; }
+  .contact-line{ display:flex; align-items:center; gap:.5rem; font-size:14px; color:var(--muted); }
+  .contact-line a{ color:#9bd3ff; text-decoration:none; }
+  .contact-line a:hover{ text-decoration:underline; }
 
-    /* Modal (send message) */
-    .modal{ position:fixed; inset:0; display:none; z-index:20; align-items:center; justify-content:center; background:rgba(0,0,0,.45); padding:18px; }
-    .modal.open{ display:flex; }
-    .modal-card{
-      width:min(92vw,640px); background:#0b1220; border:1px solid var(--border);
-      border-radius:16px; padding:18px; box-shadow:0 24px 60px rgba(0,0,0,.5);
-    }
-    .modal-card h2{ margin:0 0 10px; font-size:20px; }
-    textarea{
-      width:100%; min-height:160px; resize:vertical;
-      background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:12px; padding:10px;
-      font-family: inherit; font-size:14px;
-    }
-    .modal-actions{ margin-top:12px; display:flex; gap:10px; justify-content:flex-end; }
+  /* Modal */
+  .modal{ position:fixed; inset:0; display:none; z-index:20; align-items:center; justify-content:center; background:rgba(0,0,0,.45); padding:18px; }
+  .modal.open{ display:flex; }
+  .modal-card{
+    width:min(92vw,640px); background:#0b1220; border:1px solid var(--border);
+    border-radius:16px; padding:18px; box-shadow:0 24px 60px rgba(0,0,0,.5);
+  }
+  .modal-card h2{ margin:0 0 10px; font-size:20px; }
+  textarea{
+    width:100%; min-height:160px; resize:vertical;
+    background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:12px; padding:10px;
+    font-family: inherit; font-size:14px;
+  }
+  .modal-actions{ margin-top:12px; display:flex; gap:10px; justify-content:flex-end; }
 
-    /* Toast (custom thank-you message) */
-    .toast{
-      position:fixed; left:50%; top:20px; transform:translateX(-50%) translateY(-8px);
-      background:#0b1220f2; border:1px solid var(--border); border-radius:14px;
-      padding:12px 14px; box-shadow:0 16px 40px rgba(0,0,0,.45); backdrop-filter: blur(10px);
-      z-index:30; opacity:0; pointer-events:none; white-space:pre-wrap; text-align:center; min-width:260px;
-      transition:opacity .25s ease, transform .25s ease;
-    }
-    .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  /* Toast */
+  .toast{
+    position:fixed; left:50%; top:20px; transform:translateX(-50%) translateY(-8px);
+    background:#0b1220f2; border:1px solid var(--border); border-radius:14px;
+    padding:12px 14px; box-shadow:0 16px 40px rgba(0,0,0,.45); backdrop-filter: blur(10px);
+    z-index:30; opacity:0; pointer-events:none; white-space:pre-wrap; text-align:center; min-width:260px;
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
-    /* Emoji rain (behind the card) */
-    .emoji{ position:fixed; top:-60px; z-index:1; pointer-events:auto; user-select:none; }
-    .emoji .inner{
-      display:block; filter: drop-shadow(0 3px 6px rgba(0,0,0,.35));
-      animation: sway 7.5s ease-in-out infinite;
-      transition: transform .12s ease, opacity .2s ease;
-      cursor:pointer;
-    }
-    .emoji .inner:hover{ transform: scale(1.12) }
-    .emoji.pop .inner{ animation:none }
+  /* Emoji + sparkle */
+  .emoji{ position:fixed; top:-60px; z-index:1; pointer-events:auto; user-select:none; }
+  .emoji .inner{
+    display:block; filter: drop-shadow(0 3px 6px rgba(0,0,0,.35));
+    animation: sway 7.5s ease-in-out infinite;
+    transition: transform .12s ease, opacity .2s ease;
+    cursor:pointer;
+  }
+  .emoji .inner:hover{ transform: scale(1.12) }
+  .emoji.pop .inner{ animation:none }
+  @keyframes fall { to { transform: translateY(110vh); opacity:1; } }
+  @keyframes sway { 0%{ transform: translateX(0) rotate(0deg); }
+                    50%{ transform: translateX(var(--sx, 22px)) rotate(var(--rot, 10deg)); }
+                    100%{ transform: translateX(0) rotate(0deg); } }
+  @keyframes popAway { 0%{ transform: translateY(0) scale(1); opacity:1 }
+                       60%{ transform: translateY(-18px) scale(1.35); opacity:.95 }
+                       100%{ transform: translateY(-46px) scale(.6); opacity:0 } }
+  .sparkle{
+    position:fixed; z-index:3; pointer-events:none; color:#ffe08a; font-size:18px;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,.35)); animation: sparkleUp .8s ease-out forwards;
+  }
+  @keyframes sparkleUp{ 0%{ transform: translateY(0) scale(.9); opacity:.95 }
+                        100%{ transform: translateY(-28px) scale(1.1); opacity:0 } }
 
-    @keyframes fall { to { transform: translateY(110vh); opacity:1; } }
-    @keyframes sway { 0%{ transform: translateX(0) rotate(0deg); }
-                      50%{ transform: translateX(var(--sx, 22px)) rotate(var(--rot, 10deg)); }
-                      100%{ transform: translateX(0) rotate(0deg); } }
-    @keyframes popAway { 0%{ transform: translateY(0) scale(1); opacity:1 }
-                         60%{ transform: translateY(-18px) scale(1.35); opacity:.95 }
-                         100%{ transform: translateY(-46px) scale(.6); opacity:0 } }
-    .sparkle{
-      position:fixed; z-index:3; pointer-events:none; color:#ffe08a; font-size:18px;
-      filter: drop-shadow(0 2px 6px rgba(0,0,0,.35)); animation: sparkleUp .8s ease-out forwards;
-    }
-    @keyframes sparkleUp{ 0%{ transform: translateY(0) scale(.9); opacity:.95 }
-                          100%{ transform: translateY(-28px) scale(1.1); opacity:0 } }
-
-    /* Music widget */
-    .music{
-      position:fixed; right:14px; bottom:14px; z-index:26;
-      display:flex; align-items:center; gap:8px;
-      background:#0b1220cc; border:1px solid var(--border); border-radius:12px; padding:8px 10px;
-      box-shadow:0 12px 30px rgba(0,0,0,.35); backdrop-filter: blur(8px);
-    }
-    .music button{
-      appearance:none; border:1px solid #2b3b52; background:#0e1728; color:var(--text);
-      padding:6px 10px; border-radius:10px; cursor:pointer; font-weight:600;
-    }
-    .music button:hover{ border-color:#475569; }
-    .music input[type="range"]{ width:120px; }
-
-    /* Reduced motion */
-    @media (prefers-reduced-motion: reduce){
-      .emoji .inner{ animation:none }
-    }
-  </style>
+  /* NEW: round music FAB + slider */
+  .music-fab{
+    position:fixed; right:16px; bottom:16px; z-index:30;
+    display:flex; align-items:center; gap:12px;
+  }
+  .music-btn{
+    width:56px; height:56px; border-radius:50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color:#081018; border:0; cursor:pointer; font-size:26px;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 20px rgba(0,0,0,.4);
+    transition: transform .15s ease, filter .2s ease;
+  }
+  .music-btn:hover{ transform:scale(1.06); filter:brightness(1.05); }
+  .music-slider{
+    -webkit-appearance:none; width:140px; height:6px; outline:0;
+    background:#0b1220cc; border:1px solid var(--border);
+    border-radius:999px; box-shadow:0 4px 14px rgba(0,0,0,.25);
+  }
+  .music-slider::-webkit-slider-thumb{
+    -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+    background: var(--accent-2); border:0; box-shadow:0 1px 3px rgba(0,0,0,.4);
+  }
+  .music-slider::-moz-range-thumb{
+    width:16px; height:16px; border-radius:50%;
+    background: var(--accent-2); border:0; box-shadow:0 1px 3px rgba(0,0,0,.4);
+  }
+  .music-slider::-moz-range-track{
+    height:6px; background:#0b1220cc; border:1px solid var(--border); border-radius:999px;
+  }
+</style>
 </head>
 <body>
 
-  <!-- Main Card -->
-  <div class="card" id="card">
-    <h1 id="title">Thank you, team!</h1>
-
-    <!-- Paragraphs -->
-    <div class="msg" id="message">
-      <p>Hello everyone,</p>
-      <p>I’m writing to share that I’ll be leaving Laing O’Rourke to begin the next chapter of my career. Working at HPC has been a privilege — I’ve learned so much from each of you, and those lessons and experiences will stay with me. My last working day is Thursday, 4 September 2025.</p>
-      <p>If our paths cross in the future, I’d be delighted to work with you again. If you’d like to stay in touch, please see the “Get in touch” options below — I’d love to hear from you.</p>
-    </div>
-
-    <p class="meta" id="signature">— Irfana</p>
-
-    <div class="row">
-      <button id="sendMsgBtn" class="btn primary">💬 Send message to Irfana</button>
-
-      <div style="position:relative">
-        <button id="contactBtn" class="btn">🤝 Get in touch</button>
-        <div id="contactPopover" class="popover" aria-live="polite">
-          <div class="contact-line" style="margin-bottom:6px;">
-            📧 <span style="opacity:.9;">Irfanasultana@hotmail.co.uk</span>
-          </div>
-          <div class="contact-line" style="margin-bottom:10px;">
-            🔗 <a href="https://www.linkedin.com/in/irfanasultana/" target="_blank" rel="noopener noreferrer">linkedin.com/in/irfanasultana</a>
-          </div>
-          <div style="display:flex; gap:8px; margin-top:4px;">
-            <a class="btn" href="mailto:Irfanasultana@hotmail.co.uk">Send Email</a>
-            <a class="btn" href="https://www.linkedin.com/in/irfanasultana/" target="_blank" rel="noopener noreferrer">Open LinkedIn</a>
-          </div>
-        </div>
+<div class="card" id="card">
+  <h1 id="title">Thank you, team!</h1>
+  <div class="msg" id="message">
+    <p>Hello everyone,</p>
+    <p>I’m writing to share that I’ll be leaving Laing O’Rourke to begin the next chapter of my career...</p>
+    <p>If our paths cross in the future, I’d be delighted to work with you again...</p>
+  </div>
+  <p class="meta" id="signature">— Irfana</p>
+  <div class="row">
+    <button id="sendMsgBtn" class="btn primary">💬 Send message to Irfana</button>
+    <div style="position:relative">
+      <button id="contactBtn" class="btn">🤝 Get in touch</button>
+      <div id="contactPopover" class="popover">
+        <div class="contact-line">📧 <span>Irfanasultana@hotmail.co.uk</span></div>
+        <div class="contact-line">🔗 <a href="https://www.linkedin.com/in/irfanasultana/" target="_blank">linkedin.com/in/irfanasultana</a></div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Send Message Modal -->
-  <div class="modal" id="modal">
-    <div class="modal-card">
-      <h2>💬 Send a message to Irfana</h2>
-
-      <input type="text" id="fbName" placeholder="Enter your name" style="
-        width:100%;
-        margin-bottom:10px;
-        padding:10px;
-        border-radius:12px;
-        border:1px solid #334155;
-        background:#0f172a;
-        color:var(--text);
-        font-family:inherit;
-        font-size:14px;
-      ">
-
-      <textarea id="fbText" placeholder="Write your message..."></textarea>
-      <div class="modal-actions">
-        <button id="cancel" class="btn">Cancel</button>
-        <button id="send" class="btn primary">Send</button>
-      </div>
+<div class="modal" id="modal">
+  <div class="modal-card">
+    <h2>💬 Send a message to Irfana</h2>
+    <input type="text" id="fbName" placeholder="Enter your name" style="width:100%;margin-bottom:10px;padding:10px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:var(--text)">
+    <textarea id="fbText" placeholder="Write your message..."></textarea>
+    <div class="modal-actions">
+      <button id="cancel" class="btn">Cancel</button>
+      <button id="send" class="btn primary">Send</button>
     </div>
   </div>
+</div>
 
-  <!-- Custom toast -->
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div id="toast" class="toast"></div>
 
-  <!-- Music (Option 2) -->
-  <audio id="bgMusic" src="bg-music.mp3" preload="auto" loop></audio>
-  <div class="music" id="musicWidget" aria-live="polite">
-    <button id="musicToggle" aria-pressed="false">▶️ Music</button>
-    <input id="musicVol" type="range" min="0" max="1" step="0.01" title="Volume">
-  </div>
+<!-- NEW music controls -->
+<audio id="bgMusic" src="bg-music.mp3" preload="auto" loop></audio>
+<div class="music-fab">
+  <button class="music-btn" id="musicToggle" aria-pressed="false">🎵</button>
+  <input id="musicVol" class="music-slider" type="range" min="0" max="1" step="0.01" value="0.2">
+</div>
 
-  <!-- Hidden iframe target for Google Form submission -->
-  <iframe name="gform-target" style="display:none"></iframe>
+<script>
+/* keep your existing JS ... */
 
-  <script>
-    /* ---------- content + background ---------- */
-    const qs   = new URLSearchParams(location.search);
-    const bg   = qs.get('bg') || "1.jpeg";
-    const name = qs.get('name') || "Irfana";
+/* Toast stays for 20s */
+function showToast(text){
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.classList.add('show');
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(()=> t.classList.remove('show'), 20000);
+}
 
-    // Optional override via ?p1=...&p2=...&p3=...
-    const p1 = qs.get('p1'), p2 = qs.get('p2'), p3 = qs.get('p3');
-    if (p1 || p2 || p3){
-      const msg = document.getElementById('message');
-      msg.innerHTML = [p1,p2,p3].filter(Boolean).map(t => `<p>${t}</p>`).join("");
-    }
-
-    document.getElementById('signature').textContent = `— ${name}`;
-
-    if (bg){
-      const url = bg.match(/^https?:\/\//) ? bg : `${bg}`;
-      document.body.style.backgroundImage = `url('${url}')`;
-      document.body.style.backgroundSize = 'cover';
-      document.body.style.backgroundPosition = 'center';
-    }
-
-    /* ---------- Get in touch popover ---------- */
-    const contactBtn = document.getElementById('contactBtn');
-    const popover = document.getElementById('contactPopover');
-    contactBtn.addEventListener('click', () => {
-      popover.classList.toggle('open');
-    });
-    document.addEventListener('click', (e)=>{
-      if (!popover.contains(e.target) && !contactBtn.contains(e.target)) popover.classList.remove('open');
-    });
-
-    /* ---------- Send message modal (Google Form submit) ---------- */
-    // From your pre-fill link → formResponse endpoint + field id:
-    // https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/viewform?usp=pp_url&entry.1175385091=...
-    const GF_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSepDMrPMO7QyUpuBlqOZFUDsvVUg6XtiYh0G2eYARxeD-3cMA/formResponse";
-    const GF_FIELD  = "entry.1175385091";
-
-    const modal   = document.getElementById('modal');
-    const sendBtn = document.getElementById('send');
-    theCancel  = document.getElementById('cancel');
-    const openMsg = document.getElementById('sendMsgBtn');
-    const fbText  = document.getElementById('fbText');
-    const fbName  = document.getElementById('fbName');
-
-    function showToast(text){
-      const t = document.getElementById('toast');
-      t.textContent = text;
-      t.classList.add('show');
-      clearTimeout(showToast._timer);
-      showToast._timer = setTimeout(()=> t.classList.remove('show'), 20000);
-    }
-
-    openMsg.addEventListener('click', ()=>{ modal.classList.add('open'); fbName.focus(); });
-    theCancel.addEventListener('click', ()=> modal.classList.remove('open'));
-
-    sendBtn.addEventListener('click', () => {
-      const nameVal = fbName.value.trim();
-      const msg = fbText.value.trim();
-
-      if (!nameVal) { showToast("Please enter your name 🙂"); return; }
-      if (!msg)     { showToast("Please write your message 🙂"); return; }
-
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = GF_ACTION;
-      form.target = 'gform-target';
-
-      const t = document.createElement('textarea');
-      t.name  = GF_FIELD;
-      t.value = `Name: ${nameVal}\nMessage: ${msg}\n\n— sent from: ${location.href}`;
-      form.appendChild(t);
-
-      document.body.appendChild(form);
-      form.submit();
-      document.body.removeChild(form);
-
-      fbText.value = "";
-      fbName.value = "";
-      modal.classList.remove('open');
-
-      // Custom friendly message instead of browser alert:
-      showToast(`${nameVal}, thank you very much 🤝\nLet's stay in touch!\n— Irfana`);
-    });
-
-    /* ---------- Continuous, natural emoji rain ---------- */
-    const EMOJIS = ["👋","🤝","💐","🏗️","👩‍💻","🌼","🙏","🎉","💌"];
-
-    const MAX_ACTIVE = 40;          // cap on screen
-    const SPAWN_MS   = 260;         // every 0.26s
-    const DUR_RANGE  = [10, 20];    // fall duration (s), varied per item
-
-    function sparkle(x,y,txt="✨"){
-      const s = document.createElement('div');
-      s.className = 'sparkle';
-      s.textContent = txt;
-      s.style.left = x + "px";
-      s.style.top  = y + "px";
-      document.body.appendChild(s);
-      setTimeout(()=>s.remove(), 900);
-    }
-
-    function activeCount(){ return document.querySelectorAll('.emoji').length; }
-
-    function spawnEmoji(){
-      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      if (activeCount() >= MAX_ACTIVE) return;
-
-      const wrap = document.createElement('div');
-      wrap.className = 'emoji';
-      const span = document.createElement('span');
-      span.className = 'inner';
-      span.textContent = EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
-
-      // random across whole viewport
-      const leftVW = Math.random()*100; // 0–100vw
-      const dur    = DUR_RANGE[0] + Math.random()*(DUR_RANGE[1]-DUR_RANGE[0]);
-      const delay  = Math.random()*0.5;
-      const size   = 22 + Math.random()*22;
-      const sway   = (Math.random()<.5?-1:1) * (10 + Math.random()*24);
-      const rot    = (Math.random()<.5?-1:1) * (4 + Math.random()*12) + "deg";
-
-      wrap.style.left = leftVW + "vw";
-      wrap.style.animation = `fall ${dur}s linear ${delay}s forwards`;
-      span.style.fontSize = size + "px";
-      span.style.setProperty('--sx', sway + "px");
-      span.style.setProperty('--rot', rot);
-
-      let popped = false;
-      span.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        popped = true;
-        const r = span.getBoundingClientRect();
-        wrap.classList.add('pop');
-        span.style.animation = 'popAway .55s ease-out forwards';
-        sparkle(r.left + r.width/2, r.top, "✨");
-        setTimeout(()=> wrap.remove(), 550);
-      });
-
-      wrap.appendChild(span);
-      document.body.appendChild(wrap);
-
-      // clean up once it reaches the bottom
-      setTimeout(()=>{ if (!popped) wrap.remove(); }, (dur+delay+0.8)*1000);
-    }
-
-    // kick off continuous rain
-    window.addEventListener('load', ()=>{
-      setInterval(spawnEmoji, SPAWN_MS);  // continuous, dispersed
-      for (let i=0;i<14;i++) setTimeout(spawnEmoji, i*90); // initial sprinkle
-    });
-
-    /* ---------- Option 1: Card tilt / parallax ---------- */
-    (() => {
-      const card = document.getElementById('card');
-      const maxTilt = 6; // degrees
-      function tilt(e){
-        const r = card.getBoundingClientRect();
-        const px = (e.clientX - r.left) / r.width;
-        const py = (e.clientY - r.top)  / r.height;
-        const rx = (py - 0.5) * -maxTilt;
-        const ry = (px - 0.5) *  maxTilt;
-        card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
-      }
-      function reset(){ card.style.transform = 'perspective(900px) rotateX(0) rotateY(0)'; }
-      card.addEventListener('mousemove', tilt);
-      card.addEventListener('mouseleave', reset);
-    })();
-
-    /* ---------- Option 2: Click fireworks anywhere ---------- */
-    (() => {
-      const burst = (x,y) => {
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        const bits = ['✨','🌟','💛','💙','🤍'];
-        for (let i=0;i<8;i++){
-          const s = document.createElement('div');
-          s.className = 'sparkle';
-          s.textContent = bits[Math.floor(Math.random()*bits.length)];
-          s.style.left = x + 'px'; s.style.top = y + 'px';
-          s.style.transition = 'transform .7s ease-out, opacity .7s ease-out';
-          document.body.appendChild(s);
-          requestAnimationFrame(()=>{
-            const dx = (Math.random()-0.5)*90, dy = (Math.random()-0.8)*120;
-            s.style.transform = `translate(${dx}px, ${dy}px) scale(1.1)`;
-            s.style.opacity = 0;
-          });
-          setTimeout(()=>s.remove(), 800);
-        }
-      };
-      document.addEventListener('click', (e)=>{
-        const tag = e.target.tagName;
-        if (['BUTTON','A','TEXTAREA','INPUT'].includes(tag)) return;
-        if (e.target.closest('.modal-card') || e.target.closest('.popover')) return;
-        burst(e.clientX, e.clientY);
-        if (navigator.vibrate) navigator.vibrate(8);
-      });
-    })();
-
-    /* ---------- Background Music (Option 2) ---------- */
-    const music    = document.getElementById('bgMusic');
-    const toggle   = document.getElementById('musicToggle');
-    const vol      = document.getElementById('musicVol');
-    const savedVol = Number(localStorage.getItem('gb_music_vol') || 0.35);
-    const savedOn  = localStorage.getItem('gb_music_on') === '1';
-
-    music.volume = Math.min(1, Math.max(0, savedVol));
-    vol.value = music.volume;
-
-    function setToggleUI(){
-      const on = !music.paused;
-      toggle.textContent = on ? '⏸️ Music' : '▶️ Music';
-      toggle.setAttribute('aria-pressed', String(on));
-    }
-
-    toggle.addEventListener('click', async ()=>{
-      if (music.paused){
-        try { await music.play(); localStorage.setItem('gb_music_on','1'); }
-        catch(e){ /* autoplay block — ignore */ }
-      } else {
-        music.pause();
-        localStorage.setItem('gb_music_on','0');
-      }
-      setToggleUI();
-    });
-
-    vol.addEventListener('input', ()=>{
-      music.volume = Number(vol.value);
-      localStorage.setItem('gb_music_vol', String(music.volume));
-    });
-
-    // Try to start music on first user interaction if previously on
-    const tryStart = async () => {
-      if (savedOn && music.paused){
-        try { await music.play(); } catch(e){ /* blocked until user gesture */ }
-        setToggleUI();
-      }
-      window.removeEventListener('pointerdown', tryStart, {once:true});
-      window.removeEventListener('keydown', tryStart, {once:true});
-    };
-    window.addEventListener('pointerdown', tryStart, {once:true});
-    window.addEventListener('keydown', tryStart, {once:true});
-
-    // Initial label
+/* NEW music control logic */
+const music  = document.getElementById('bgMusic');
+const toggle = document.getElementById('musicToggle');
+const volEl  = document.getElementById('musicVol');
+const savedVolStr = localStorage.getItem('gb_music_vol');
+const initialVol  = savedVolStr !== null ? Number(savedVolStr) : 0.2;
+music.volume = Math.min(1, Math.max(0, initialVol));
+volEl.value  = music.volume;
+function setToggleUI(){
+  const on = !music.paused;
+  toggle.textContent = on ? '⏸' : '🎵';
+  toggle.setAttribute('aria-pressed', String(on));
+}
+toggle.addEventListener('click', async ()=>{
+  if (music.paused){
+    try { await music.play(); localStorage.setItem('gb_music_on','1'); }
+    catch(e){}
+  } else {
+    music.pause();
+    localStorage.setItem('gb_music_on','0');
+  }
+  setToggleUI();
+});
+volEl.addEventListener('input', ()=>{
+  music.volume = Number(volEl.value);
+  localStorage.setItem('gb_music_vol', String(music.volume));
+});
+const savedOn = localStorage.getItem('gb_music_on') === '1';
+const tryStart = async ()=>{
+  if (savedOn && music.paused){
+    try { await music.play(); } catch(e){}
     setToggleUI();
-  </script>
+  }
+  window.removeEventListener('pointerdown', tryStart);
+  window.removeEventListener('keydown', tryStart);
+};
+window.addEventListener('pointerdown', tryStart, {once:true});
+window.addEventListener('keydown', tryStart, {once:true});
+setToggleUI();
+</script>
+
 </body>
 </html>
-
-
-
