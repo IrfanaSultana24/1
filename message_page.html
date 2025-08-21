@@ -22,23 +22,22 @@
       overflow-x:hidden;
     }
 
-    /* Main card */
-    .card{
+    /* Main card */ 
+    .card{ 
       position:relative; 
       z-index:2; 
       max-width:760px; 
-      width:min(92vw,760px);
-      backdrop-filter: blur(12px);
-    
-      /* Orange + Grey Gradient */
-      background: linear-gradient(135deg, rgba(241,90,36,0.88), rgba(110,110,110,0.62));
-    
-      border:1px solid rgba(255,255,255,0.25); 
-      border-radius:20px;
-      padding:28px 28px 22px;
-      box-shadow:0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
+      width:min(92vw,760px); 
+      backdrop-filter: blur(12px); 
+      background: var(--card); 
+      border:1px solid var(--border); 
+      border-radius:20px; 
+      padding:28px 28px 22px; 
+      box-shadow:0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05); 
       transform: perspective(900px) rotateX(0) rotateY(0);
-      transition: transform .12s ease-out;
+      /* for tilt baseline */ 
+      
+      transition: transform .12s ease-out; 
     }
 
     h1{ font-size: clamp(28px,5vw,44px); margin:8px 0 14px; line-height:1.1; }
@@ -461,5 +460,6 @@
   </script>
 </body>
 </html>
+
 
 
